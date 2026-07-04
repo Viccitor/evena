@@ -54,6 +54,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _estaPesquisando = false;
   bool _foiFavoritado = false;
+  bool _estaPesquisando = false;
+  bool _foiFavoritado = false;
+  int _indiceAtual = 0;
 
 
 
@@ -76,12 +79,24 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      appBar: AppBar(
+      appBar: AppBar( //Header
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
         titleSpacing: 0,
-        backgroundColor: const Color(0xFF01111D),
+        backgroundColor: const Color(0xFF01011D),
+
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
+        ),
+
+
         title: _estaPesquisando
             ? Padding(
           padding: const EdgeInsets.only(right: 15),
@@ -103,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
             : Row(
           children: [
             Transform.translate(
-              offset: const Offset(-25, 0),
+              offset: const Offset(-25, 5),
               child: Image.asset(
                 'assets/images/logo_evena_s_fundo.png',
                 height: 130,
@@ -162,18 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
               const Spacer(),
 
-              TextButton(
-                onPressed: () {
-                  print('Botão de texto clicado!');
+              BotaoVerMais(
+                aoClicar: () {
+                  print('Navegar para a tela de destaques');
+
                 },
-                child: const Text(
-                  'Ver mais >',
-                  style: TextStyle(
-                    color: Color(0xFF63D13E),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               )
 
 
@@ -373,14 +381,26 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
 
             SizedBox(height: 30),
-
-            Text('Categorias',
+          Row(
+            children: [
+            const Text('Categorias',
             style: TextStyle(
               fontSize: 18,
               color: Colors.white,
               fontWeight: FontWeight.w500,
             ),
             ),
+
+            const Spacer(),
+
+            BotaoVerMais(
+              aoClicar: () {
+                print('Navegar para a tela de todas as categorias');
+
+              },
+            ),
+          ],
+      ),
 
             SizedBox(height: 10),
 
@@ -459,7 +479,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CardCategoria extends StatelessWidget { //componente dos cards da categoria
+class CardCategoria extends StatelessWidget { //classe dos cards da categoria
   final String caminhoImagem;
   final String texto;
 
@@ -506,6 +526,37 @@ class CardCategoria extends StatelessWidget { //componente dos cards da categori
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class BotaoVerMais extends StatelessWidget { //classe do botão ver Mais
+  final VoidCallback aoClicar;
+  final String texto;
+
+  const BotaoVerMais({
+    super.key,
+    required this.aoClicar,
+    this.texto = 'Ver mais >',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      onPressed: aoClicar,
+      child: Text(
+        texto,
+        style: const TextStyle(
+          color: Color(0xFF63D13E),
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

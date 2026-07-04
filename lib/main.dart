@@ -54,8 +54,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _estaPesquisando = false;
   bool _foiFavoritado = false;
-  bool _estaPesquisando = false;
-  bool _foiFavoritado = false;
   int _indiceAtual = 0;
 
 

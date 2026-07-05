@@ -49,12 +49,40 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
+
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _estaPesquisando = false;
   bool _foiFavoritado = false;
   int _indiceAtual = 0;
+
+  Widget _construirIconeComLinha(IconData icone, int indiceDestino) {
+    bool estaSelecionado = _indiceAtual == indiceDestino;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icone,
+          color: estaSelecionado ? const Color(0xFF63D13E) : Colors.white54,
+        ),
+        const SizedBox(height: 4), // Espaço entre o ícone e a linha
+
+        // 🚀 A mágica da linha verde animada/visível
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250), // Velocidade da animação da linha
+          height: 2, // Espessura da linha
+          width: estaSelecionado ? 24 : 0, // Se selecionado abre a linha, se não ela some
+          decoration: BoxDecoration(
+            color: const Color(0xFF63D13E),
+            borderRadius: BorderRadius.circular(1),
+          ),
+        ),
+      ],
+    );
+  }
+
 
 
 
@@ -398,7 +426,10 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ],
-      ),
+      ),//FECHAMENTO DO BODY
+
+
+
 
             SizedBox(height: 10),
 
@@ -473,6 +504,50 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Colors.transparent,
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(color: Color(0xFF63D13E), fontSize: 12, fontWeight: FontWeight.w600);
+            }
+            return const TextStyle(color: Colors.white54, fontSize: 12);
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: _indiceAtual,
+          onDestinationSelected: (index) {
+            setState(() {
+              _indiceAtual = index;
+            });
+            print('Clicou na aba $index');
+          },
+          backgroundColor: const Color(0xFF181236),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow, // Mantém os nomes fixos sempre
+          destinations: [
+            NavigationDestination(
+              icon: _construirIconeComLinha(Icons.home_outlined, 0),
+              selectedIcon: _construirIconeComLinha(Icons.home, 0),
+              label: 'Início',
+            ),
+            NavigationDestination(
+              icon: _construirIconeComLinha(Icons.favorite_border, 1),
+              selectedIcon: _construirIconeComLinha(Icons.favorite, 1),
+              label: 'Favoritos',
+            ),
+            NavigationDestination(
+              icon: _construirIconeComLinha(Icons.person_outline, 2),
+              selectedIcon: _construirIconeComLinha(Icons.person, 2),
+              label: 'Perfil',
+            ),
+          ],
+        ),
+      ),
+
+
+
+
     );
   }
 }
@@ -527,7 +602,10 @@ class CardCategoria extends StatelessWidget { //classe dos cards da categoria
       ),
     );
   }
+
 }
+
+
 
 class BotaoVerMais extends StatelessWidget { //classe do botão ver Mais
   final VoidCallback aoClicar;
@@ -559,3 +637,4 @@ class BotaoVerMais extends StatelessWidget { //classe do botão ver Mais
     );
   }
 }
+

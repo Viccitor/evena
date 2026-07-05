@@ -510,38 +510,46 @@ class _MyHomePageState extends State<MyHomePage> {
           indicatorColor: Colors.transparent,
           labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF63D13E), fontSize: 12, fontWeight: FontWeight.w600);
+              return const TextStyle(color: Color(0xFF63D13E), fontSize: 11, fontWeight: FontWeight.w600); // Diminuí um tiquinho a fonte pra caber melhor
             }
-            return const TextStyle(color: Colors.white54, fontSize: 12);
+            return const TextStyle(color: Colors.white54, fontSize: 11);
           }),
         ),
-        child: NavigationBar(
-          selectedIndex: _indiceAtual,
-          onDestinationSelected: (index) {
-            setState(() {
-              _indiceAtual = index;
-            });
-            print('Clicou na aba $index');
-          },
-          backgroundColor: const Color(0xFF181236),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow, // Mantém os nomes fixos sempre
-          destinations: [
-            NavigationDestination(
-              icon: _construirIconeComLinha(Icons.home_outlined, 0),
-              selectedIcon: _construirIconeComLinha(Icons.home, 0),
-              label: 'Início',
-            ),
-            NavigationDestination(
-              icon: _construirIconeComLinha(Icons.favorite_border, 1),
-              selectedIcon: _construirIconeComLinha(Icons.favorite, 1),
-              label: 'Favoritos',
-            ),
-            NavigationDestination(
-              icon: _construirIconeComLinha(Icons.person_outline, 2),
-              selectedIcon: _construirIconeComLinha(Icons.person, 2),
-              label: 'Perfil',
-            ),
-          ],
+        // 🚀 PASSO 1: Corta as bordas no formato arredondado
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20.0),  // Arredonda o canto superior esquerdo
+            topRight: Radius.circular(20.0), // Arredonda o canto superior direito
+          ),
+          child: NavigationBar(
+            height: 65, // 🚀 PASSO 2: Ajusta a altura da barra (o padrão do Flutter é 80, deixei 65 pra ficar mais fina)
+            selectedIndex: _indiceAtual,
+            onDestinationSelected: (index) {
+              setState(() {
+                _indiceAtual = index;
+              });
+              print('Clicou na aba $index');
+            },
+            backgroundColor: const Color(0xFF181236),
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            destinations: [
+              NavigationDestination(
+                icon: _construirIconeComLinha(Icons.home_outlined, 0),
+                selectedIcon: _construirIconeComLinha(Icons.home, 0),
+                label: 'Início',
+              ),
+              NavigationDestination(
+                icon: _construirIconeComLinha(Icons.favorite_border, 1),
+                selectedIcon: _construirIconeComLinha(Icons.favorite, 1),
+                label: 'Favoritos',
+              ),
+              NavigationDestination(
+                icon: _construirIconeComLinha(Icons.person_outline, 2),
+                selectedIcon: _construirIconeComLinha(Icons.person, 2),
+                label: 'Perfil',
+              ),
+            ],
+          ),
         ),
       ),
 

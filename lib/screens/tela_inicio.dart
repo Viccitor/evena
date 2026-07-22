@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'tela_cadastro.dart';
 
 class TelaInicio extends StatefulWidget {
   const TelaInicio({super.key});
@@ -96,7 +97,9 @@ class _TelaInicioState extends State<TelaInicio> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 15),
+
                       // Subtítulo
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -148,7 +151,13 @@ class _TelaInicioState extends State<TelaInicio> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      print('Botão Clicado');
+                      print('Botão começar Clicado');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaCadastro(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5CD825),
@@ -196,7 +205,7 @@ class _TelaInicioState extends State<TelaInicio> {
                 height: 50,
                 child: ElevatedButton(
                     onPressed: () {
-                      print('Botão Clicado');
+                      print('Botão ja tenho conta clicado');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF000010),

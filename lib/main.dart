@@ -1,3 +1,4 @@
+import 'package:evena/screens/tela_cadastro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:window_manager/window_manager.dart';
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: const Color(0xFF080427),
       drawer: Drawer(
         child: ListView(
-          children: const [
+          children: [
             DrawerHeader(
               child: Text("Menu"),
             ),
@@ -101,6 +102,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ListTile(
               title: Text("Perfil"),
+            ),
+            ListTile(
+              title: Text("Cadastro"),
+              leading: Icon(Icons.person_add),
+
+              onTap: (){
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TelaCadastro()
+                  ),
+                );
+              },
             ),
           ],
         ),

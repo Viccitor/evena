@@ -1,15 +1,15 @@
-import 'dart:ui';
+
 
 import 'package:flutter/material.dart';
 
-class TelaCadastro extends StatefulWidget {
-  const TelaCadastro({super.key});
+class TelaInicio extends StatefulWidget {
+  const TelaInicio({super.key});
 
   @override
-  State<TelaCadastro> createState() => _TelaCadastroState();
+  State<TelaInicio> createState() => _TelaInicioState();
 }
 
-class _TelaCadastroState extends State<TelaCadastro> {
+class _TelaInicioState extends State<TelaInicio> {
   //Controlador para saber qual página está ativa
   int _paginaAtual = 0;
   final PageController _pageController = PageController();
@@ -226,7 +226,6 @@ class _TelaCadastroState extends State<TelaCadastro> {
 
             const SizedBox(height: 30),
 
-            // 🚀 AQUI VOCÊ VAI COLOCAR OS INPUTS E BOTÕES DO SEU DESIGN
           ],
         ),
       ),

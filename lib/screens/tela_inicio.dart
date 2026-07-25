@@ -144,7 +144,7 @@ class _TelaInicioState extends State<TelaInicio> {
 
             const SizedBox(height: 30),
 
-            Padding( //botão começar
+            Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: SizedBox(
                   width: double.infinity,
@@ -159,6 +159,7 @@ class _TelaInicioState extends State<TelaInicio> {
                         ),
                       );
                     },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5CD825),
                       foregroundColor: Colors.black,

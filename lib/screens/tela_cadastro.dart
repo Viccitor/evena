@@ -2,111 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'tela_login.dart';
 import 'package:evena/main.dart';
+import 'package:evena/components/campo_texto_customizado.dart';
+import 'package:evena/components/botao_customizado.dart';
 
 
-class CampoTextoCustomizado extends StatefulWidget {
-  final String titulo;
-  final String labelText;
-  final IconData prefixIcon;
-  final bool isSenha;
-  final TextInputType keyboardType;
-  final TextEditingController? controller;
-
-  const CampoTextoCustomizado({
-    super.key,
-    required this.titulo,
-    required this.labelText,
-    required this.prefixIcon,
-    this.isSenha = false,
-    this.keyboardType = TextInputType.text,
-    this.controller,
-  });
-
-  @override
-  State<CampoTextoCustomizado> createState() => _CampoTextoCustomizadoState();
-}
-
-class _CampoTextoCustomizadoState extends State<CampoTextoCustomizado> {
-  late bool _esconderTexto;
-
-  @override
-  void initState() {
-    super.initState();
-    _esconderTexto = widget.isSenha;
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        Text(
-          widget.titulo,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Campo de Texto
-        TextField(
-          controller: widget.controller,
-          obscureText: _esconderTexto,
-          keyboardType: widget.keyboardType,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            labelText: widget.labelText,
-            labelStyle: const TextStyle(color: Colors.white38),
-            prefixIcon: Icon(widget.prefixIcon),
-
-            // Cor dinâmica do ícone da esquerda
-            prefixIconColor: WidgetStateColor.resolveWith((states) {
-              if (states.contains(WidgetState.focused)) {
-                return const Color(0xFF63D13E);
-              }
-              return const Color(0XFFA62CFB);
-            }),
-
-
-
-
-
-            suffixIcon: widget.isSenha
-                ? IconButton(
-              icon: Icon(
-                _esconderTexto
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: Colors.white70,
-              ),
-              onPressed: () {
-                // Inverte a visibilidade ao clicar no olho
-                setState(() {
-                  _esconderTexto = !_esconderTexto;
-                });
-              },
-            )
-                : null,
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF3B1E78)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF63D13E), width: 1.5),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 
 
@@ -136,7 +35,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
       ),
 
 
-        body: SingleChildScrollView( // 🚀 1. Coloque o ScrollView por fora
+        body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
@@ -285,57 +184,18 @@ class _TelaCadastroState extends State<TelaCadastro> {
 
 
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _aceitouTermos
-                        ? () {
-                      print('Botão criar conta Clicado');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Evena')),
-                      );
-                    }
-                        : null,
-
-                    style: ElevatedButton.styleFrom(
-
-                      backgroundColor: _aceitouTermos
-                          ? const Color(0xFF5CD825)
-                          : const Color(0xFF2C2C3E),
-
-
-                      foregroundColor: _aceitouTermos ? Colors.black : Colors.white38,
-
-
-                      disabledBackgroundColor: const Color(0xFF1E1E2C),
-                      disabledForegroundColor: Colors.white30,
-
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                BotaoCustomizado(
+                  texto: 'Criar Conta',
+                  onPressed: _aceitouTermos
+                      ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyHomePage(title: 'Evena'),
                       ),
-                    ),
-
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(width: 20),
-                        Text(
-                          'Criar Conta',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
+                    );
+                  }
+                      : null, // Se for null, o Flutter desabilita o botão e aplica a cor cinza sozinho!
                 ),
 
         const SizedBox(height: 30),
@@ -358,7 +218,6 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         ),
 
                         TextSpan(
-
                           text: ' Entrar',
                           style: TextStyle(
                             color: Color(0xFF5CD825),

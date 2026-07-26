@@ -4,6 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:evena/components/cards_categoria.dart';
+import 'package:evena/components/botao_ver_mais.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,13 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
           icone,
           color: estaSelecionado ? const Color(0xFF63D13E) : Colors.white54,
         ),
-        const SizedBox(height: 4), // Espaço entre o ícone e a linha
+        const SizedBox(height: 4),
 
-        // 🚀 A mágica da linha verde animada/visível
+
         AnimatedContainer(
-          duration: const Duration(milliseconds: 250), // Velocidade da animação da linha
+          duration: const Duration(milliseconds: 250),
           height: 2, // Espessura da linha
-          width: estaSelecionado ? 24 : 0, // Se selecionado abre a linha, se não ela some
+          width: estaSelecionado ? 24 : 0,
           decoration: BoxDecoration(
             color: const Color(0xFF63D13E),
             borderRadius: BorderRadius.circular(1),
@@ -121,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+
       appBar: AppBar( //Header
         iconTheme: const IconThemeData(
           color: Colors.white,
@@ -182,6 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
               }),
         ],
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -531,15 +536,14 @@ class _MyHomePageState extends State<MyHomePage> {
             return const TextStyle(color: Colors.white54, fontSize: 11);
           }),
         ),
-        // 🚀 PASSO 1: Corta as bordas no formato arredondado
+
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20.0),  // Arredonda o canto superior esquerdo
-            topRight: Radius.circular(20.0), // Arredonda o canto superior direito
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
           ),
           child: NavigationBar(
-            height: 65, // 🚀 PASSO 2: Ajusta a altura da barra (o padrão do Flutter é 80, deixei 65 pra ficar mais fina)
-            selectedIndex: _indiceAtual,
+            height: 65,
             onDestinationSelected: (index) {
               setState(() {
                 _indiceAtual = index;
@@ -572,92 +576,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-    );
-  }
-}
-
-class CardCategoria extends StatelessWidget { //classe dos cards da categoria
-  final String caminhoImagem;
-  final String texto;
-
-
-  const CardCategoria({
-    super.key,
-    required this.caminhoImagem,
-    required this.texto,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      width: 80,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1B0F3F),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Center(
-              child: Image.asset(
-                height: 40,
-                caminhoImagem,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            texto,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w200,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-}
-
-
-
-class BotaoVerMais extends StatelessWidget { //classe do botão ver Mais
-  final VoidCallback aoClicar;
-  final String texto;
-
-  const BotaoVerMais({
-    super.key,
-    required this.aoClicar,
-    this.texto = 'Ver mais >',
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      onPressed: aoClicar,
-      child: Text(
-        texto,
-        style: const TextStyle(
-          color: Color(0xFF63D13E),
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

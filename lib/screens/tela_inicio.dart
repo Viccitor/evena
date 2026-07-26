@@ -1,5 +1,5 @@
 
-
+import 'package:evena/components/botao_customizado.dart';
 import 'package:evena/screens/tela_login.dart';
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
@@ -147,105 +147,41 @@ class _TelaInicioState extends State<TelaInicio> {
             const SizedBox(height: 30),
 
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('Botão começar Clicado');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TelaCadastro(),
-                        ),
-                      );
-                    },
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5CD825),
-                      foregroundColor: Colors.black,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-
-
-
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(width:20),
-
-
-
-                        Text(
-                          'Começar',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 20,
-                        ),
-                      ]
-
-                    )
-
-
-                  ),
-                ),
-            ),
-
-            SizedBox(height: 20),
-
-            Padding( //botão ja tenho conta
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                    onPressed: () {
-                        print('Botão começar Clicado');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const TelaLogin(),
-                          ),
-                        );
+              child:Column(
+                children: [
 
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF000010),
-                      foregroundColor: const Color(0XFFA62CFB),
-                      elevation: 0,
-                      side: const BorderSide(
-                        color: Color(0XFFA62CFB),
-                        width: 0.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-
-
-                          child: const Text(
-                            'Já tenho uma conta',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              
-                            ),
-                          ),
-                    )
-                ),
+              BotaoCustomizado(
+                texto: 'Começar',
+                temSeta: true,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TelaCadastro()),
+                  );
+                },
               ),
 
-            const SizedBox(height: 30),
+
+
+            const SizedBox(height: 20),
+
+            BotaoCustomizado(
+              texto: 'Já tenho conta',
+              isSecundario: true,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TelaLogin()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+
+
+            SizedBox(height: 30),
 
           ],
         ),

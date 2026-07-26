@@ -4,19 +4,19 @@ class BotaoCustomizado extends StatelessWidget {
   final String texto;
   final VoidCallback? onPressed;
   final bool temSeta;
-  final bool isSecundario; // Para o botão roxo com borda
+  final bool isSecundario;
 
   const BotaoCustomizado({
     super.key,
     required this.texto,
     required this.onPressed,
-    this.temSeta = true,       // Por padrão vem com a seta
-    this.isSecundario = false, // Por padrão é o botão verde principal
+    this.temSeta = true,
+    this.isSecundario = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 🎨 Cores para o estilo Principal (Verde) vs Secundário (Roxo com Borda)
+
     final Color corFundo = isSecundario ? const Color(0xFF000010) : const Color(0xFF5CD825);
     final Color corTexto = isSecundario ? const Color(0XFFA62CFB) : Colors.black;
 

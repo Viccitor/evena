@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
 import 'tela_inicio.dart';
 import 'package:evena/components/botao_customizado.dart';
-import 'tela_cadastro.dart';
 import 'tela_esqueceu_senha.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -10,6 +9,33 @@ class TelaLogin extends StatefulWidget {
 
   @override
   State<TelaLogin> createState() => _TelaLoginState();
+}
+
+Widget _buildBotaoSocial({
+  required String caminhoImagem,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16.0),
+    child: Container(
+      width: 60,
+      height: 60,
+      padding: const EdgeInsets.all(6.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E2C),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: Colors.white12, // Borda sutil
+          width: 1,
+        ),
+      ),
+      child: Image.asset(
+        caminhoImagem,
+        fit: BoxFit.contain,
+      ),
+    ),
+  );
 }
 
 class _TelaLoginState extends State<TelaLogin> {
@@ -132,7 +158,76 @@ class _TelaLoginState extends State<TelaLogin> {
                     MaterialPageRoute(builder: (context) => const TelaInicio()),
                   );
                 },
-              )
+              ),
+
+              SizedBox(height: 20),
+
+              Row(
+                children: [
+
+                  const Expanded(
+                    child: Divider(
+                      color: Colors.white24,
+                      thickness: 1,
+                    ),
+                  ),
+
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'ou continue com',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+
+
+                  const Expanded(
+                    child: Divider(
+                      color: Colors.white24,
+                      thickness: 1,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 20),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+
+                  _buildBotaoSocial(
+
+                    caminhoImagem: 'assets/images/apple_logo_s_fundo.png',
+                    onTap: () {
+                      print('Login com Google');
+                    },
+                  ),
+
+
+                  _buildBotaoSocial(
+                    caminhoImagem: 'assets/images/google_logo_s_fundo.png',
+                    onTap: () {
+                      print('Login com Apple');
+                    },
+                  ),
+
+
+                  _buildBotaoSocial(
+                    caminhoImagem: 'assets/images/facebook_logo_s_fundo.png',
+                    onTap: () {
+                      print('Login com Facebook');
+                    },
+                  ),
+                ],
+              ),
+
+
 
 
 

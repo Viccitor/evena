@@ -5,16 +5,6 @@ import 'package:evena/main.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
 import 'package:evena/components/botao_customizado.dart';
 
-
-
-
-
-
-
-
-
-
-
 class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
 

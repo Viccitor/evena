@@ -1,7 +1,9 @@
 
 
+import 'package:evena/screens/tela_login.dart';
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
+
 
 class TelaInicio extends StatefulWidget {
   const TelaInicio({super.key});
@@ -171,10 +173,12 @@ class _TelaInicioState extends State<TelaInicio> {
 
 
 
-                    child: const Row(//botão ja tenho conta
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SizedBox(width:20),
+
+
 
                         Text(
                           'Começar',
@@ -206,7 +210,14 @@ class _TelaInicioState extends State<TelaInicio> {
                 height: 50,
                 child: ElevatedButton(
                     onPressed: () {
-                      print('Botão ja tenho conta clicado');
+                        print('Botão começar Clicado');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TelaLogin(),
+                          ),
+                        );
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF000010),

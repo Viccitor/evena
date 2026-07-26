@@ -8,7 +8,7 @@ class CampoTextoCustomizado extends StatefulWidget {
   final String titulo;
   final String labelText;
   final IconData prefixIcon;
-  final bool isSenha; // 🚀 Define se é um campo de senha (para mostrar o olho)
+  final bool isSenha;
   final TextInputType keyboardType;
   final TextEditingController? controller;
 
@@ -17,7 +17,7 @@ class CampoTextoCustomizado extends StatefulWidget {
     required this.titulo,
     required this.labelText,
     required this.prefixIcon,
-    this.isSenha = false, // Por padrão não é senha
+    this.isSenha = false,
     this.keyboardType = TextInputType.text,
     this.controller,
   });

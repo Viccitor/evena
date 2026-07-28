@@ -6,7 +6,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:evena/components/cards_categoria.dart';
 import 'package:evena/components/botao_ver_mais.dart';
-
+import 'package:evena/screens/tela_detalhe_evento.dart';
+import 'package:evena/models/evento.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -404,7 +405,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
                             IconButton(
                               onPressed: () {
-                                print('Botão do card clicado!');
+
+                                final eventoSelecionado = Evento(
+                                  id: '1',
+                                  titulo: 'Evento de Marketing Digital',
+                                  imagemUrl: 'assets/images/evento1.jpg',
+                                  dia: '24',
+                                  mes: 'FEV',
+                                  hora: '19:00',
+                                  local: 'Hotel Trânsilvânia São Paulo - SP',
+                                  descricao: 'Aprenda as melhores estratégias de marketing digital para 2026 com especialistas do mercado!',
+                                );
+
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TelaDetalheEvento(
+                                      evento: eventoSelecionado,
+                                    ),
+                                  ),
+                                );
                               },
                               icon: const Icon(
                                 Icons.arrow_forward_ios,

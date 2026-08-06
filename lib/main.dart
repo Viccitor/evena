@@ -413,7 +413,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                   dia: '24',
                                   mes: 'FEV',
                                   hora: '19:00',
-                                  local: 'Hotel Trânsilvânia São Paulo - SP',
+                                  local: 'Hotel Trânsilvânia ',
+                                  endereco: 'São Paulo - SP',
+                                  formato: 'Presencial',
                                   descricao: 'Aprenda as melhores estratégias de marketing digital para 2026 com especialistas do mercado!',
                                 );
 

@@ -1,4 +1,4 @@
-// lib/models/evento.dart
+
 class Evento {
   final String id;
   final String titulo;
@@ -7,7 +7,9 @@ class Evento {
   final String mes;
   final String hora;
   final String local;
+  final String endereco;
   final String descricao;
+  final String formato;
 
   Evento({
     required this.id,
@@ -17,6 +19,8 @@ class Evento {
     required this.mes,
     required this.hora,
     required this.local,
+    required this.endereco,
     required this.descricao,
+    required this.formato,
   });
 }

@@ -414,7 +414,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   mes: 'FEV',
                                   hora: '19:00',
                                   local: 'Hotel Trânsilvânia ',
-                                  endereco: 'São Paulo - SP',
+                                  endereco: 'R. Oscar Freire, 3555 - Pinheiros, São Paulo - SP 05409-011',
                                   formato: 'Presencial',
                                   descricao: 'Aprenda as melhores estratégias de marketing digital para 2026 com especialistas do mercado!',
                                 );

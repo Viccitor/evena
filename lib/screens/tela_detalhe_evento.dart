@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:evena/models/evento.dart';
 import 'package:evena/components/botao_ver_mais.dart';
 import 'package:evena/components/card_secao.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TelaDetalheEvento extends StatefulWidget {
   final Evento evento;
@@ -254,6 +255,100 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
                       ],
                     ),
                   ),
+
+                  CardSecao(
+                    titulo: 'Localização',
+                    icone: Icons.pin_drop_outlined,
+
+                    conteudo: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+
+                        // Texto do local e endereço
+                        Expanded(
+
+                          child: RichText(
+
+                            text: TextSpan(
+
+                              style: const TextStyle(
+                                height: 1.4,
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+
+                              children: [
+
+                                TextSpan(
+                                  text: '${widget.evento.local}\n',
+
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF63D13E),
+                                  ),
+
+                                ),
+
+                                TextSpan(
+                                  text: widget.evento.endereco,
+                                  style: const TextStyle(
+
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // Botao Como chegar
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            final enderecoCompleto = ' ${widget.evento.endereco}';
+                            _abrirGoogleMaps(enderecoCompleto);
+                            // Ação ao clicar (ex: abrir Google Maps)
+                          },
+
+                          icon: const Icon(
+                            Icons.directions_outlined,
+                            size: 16,
+                            color: Color(0xFF8540C6),
+                          ),
+
+                          label: const Text(
+                            'Como chegar',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            side: BorderSide(
+                              color: const Color(0xFF7C2BDC).withValues(alpha: 0.5),
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+
                 ],
               ),
             ),
@@ -314,5 +409,23 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
         ),
       ),
     );
+  }
+}
+
+Future<void> _abrirGoogleMaps(String endereco) async {
+  // 🚀 Codifica o texto para ser seguro em URLs (espaços viram %20, etc.)
+  final String query = Uri.encodeComponent(endereco);
+
+  // 🚀 Link oficial de busca do Google Maps:
+  final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+
+  try {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint('Não foi possível abrir a URL: $url');
+    }
+  } catch (e) {
+    debugPrint('Erro ao tentar abrir o mapa: $e');
   }
 }

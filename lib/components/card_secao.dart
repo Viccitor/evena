@@ -28,15 +28,10 @@ class CardSecao extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icone,
-                color: const Color(0xFF8540C6),
-                size: 16,
-              ),
+              Icon(icone, color: const Color(0xFF8540C6), size: 16),
               const SizedBox(width: 8),
               Text(
                 titulo,
@@ -50,7 +45,6 @@ class CardSecao extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-
 
           conteudo,
         ],

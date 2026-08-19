@@ -1,27 +1,27 @@
-import 'package:evena/screens/tela_inicio.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:window_manager/window_manager.dart';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
+import 'package:evena/components/card_evento.dart';
 import 'package:evena/components/cards_categoria.dart';
-import 'package:evena/components/botao_ver_mais.dart';
-import 'package:evena/screens/tela_detalhe_evento.dart';
+import 'package:evena/data/eventos_data.dart';
 import 'package:evena/models/evento.dart';
+import 'package:evena/screens/tela_detalhe_evento.dart';
+import 'package:evena/screens/tela_inicio.dart';
+import 'package:evena/screens/tela_pesquisa.dart';
+import 'package:evena/services/favoritos_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
+    const windowOptions = WindowOptions(
       size: Size(390, 844),
       center: true,
       title: 'Evena',
     );
-
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -38,9 +38,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'evena App',
+      title: 'Evena',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF63D13E),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF080427),
       ),
       home: const MyHomePage(title: 'Evena'),
     );
@@ -54,467 +59,262 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _estaPesquisando = false;
-  bool _foiFavoritado = false;
   int _indiceAtual = 0;
 
-  Widget _construirIconeComLinha(IconData icone, int indiceDestino) {
-    bool estaSelecionado = _indiceAtual == indiceDestino;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icone,
-          color: estaSelecionado ? const Color(0xFF63D13E) : Colors.white54,
-        ),
-        const SizedBox(height: 4),
-
-
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          height: 2, // Espessura da linha
-          width: estaSelecionado ? 24 : 0,
-          decoration: BoxDecoration(
-            color: const Color(0xFF63D13E),
-            borderRadius: BorderRadius.circular(1),
-          ),
-        ),
-      ],
+  void _abrirEvento(Evento evento) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TelaDetalheEvento(evento: evento)),
     );
   }
 
-
-
+  void _abrirPesquisa() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TelaPesquisa()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final paginas = [
+      _InicioTab(onAbrirEvento: _abrirEvento, onPesquisar: _abrirPesquisa),
+      _FavoritosTab(onAbrirEvento: _abrirEvento),
+      const _PerfilTab(),
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFF080427),
-      drawer: Drawer(
+      drawer: _buildDrawer(),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF01011D),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleSpacing: 0,
+        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 88),
+        actions: [
+          if (_indiceAtual != 2)
+            IconButton(
+              tooltip: 'Pesquisar',
+              onPressed: _abrirPesquisa,
+              icon: const Icon(Icons.search_rounded, color: Colors.white),
+            ),
+          const SizedBox(width: 6),
+        ],
+      ),
+      body: IndexedStack(index: _indiceAtual, children: paginas),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Colors.transparent,
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                color: Color(0xFF63D13E),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              );
+            }
+            return const TextStyle(color: Colors.white54, fontSize: 11);
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: _indiceAtual,
+          height: 68,
+          backgroundColor: const Color(0xFF181236),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          onDestinationSelected: (index) =>
+              setState(() => _indiceAtual = index),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, color: Colors.white54),
+              selectedIcon: Icon(Icons.home_rounded, color: Color(0xFF63D13E)),
+              label: 'Início',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.favorite_border_rounded, color: Colors.white54),
+              selectedIcon: Icon(
+                Icons.favorite_rounded,
+                color: Color(0xFF63D13E),
+              ),
+              label: 'Favoritos',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded, color: Colors.white54),
+              selectedIcon: Icon(
+                Icons.person_rounded,
+                color: Color(0xFF63D13E),
+              ),
+              label: 'Perfil',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      backgroundColor: const Color(0xFF100B2A),
+      child: SafeArea(
         child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              child: Text("Menu"),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+              child: Image.asset(
+                'assets/images/logo_evena_s_fundo.png',
+                height: 100,
+                alignment: Alignment.centerLeft,
+              ),
             ),
             ListTile(
-              title: Text("Home"),
-            ),
-            ListTile(
-              title: Text("Perfil"),
-            ),
-            ListTile(
-              title: Text("Cadastro"),
-              leading: Icon(Icons.person_add),
-
-              onTap: (){
+              leading: const Icon(
+                Icons.home_outlined,
+                color: Color(0xFF63D13E),
+              ),
+              title: const Text(
+                'Início',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
                 Navigator.pop(context);
-
+                setState(() => _indiceAtual = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.favorite_border_rounded,
+                color: Color(0xFF9A77D5),
+              ),
+              title: const Text(
+                'Favoritos',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _indiceAtual = 1);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.person_add_alt_1_rounded,
+                color: Color(0xFF9A77D5),
+              ),
+              title: const Text(
+                'Cadastro / Login',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const TelaInicio()
-                  ),
+                  MaterialPageRoute(builder: (_) => const TelaInicio()),
                 );
               },
             ),
           ],
         ),
       ),
+    );
+  }
+}
 
-      appBar: AppBar( //Header
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        titleSpacing: 0,
-        backgroundColor: const Color(0xFF01011D),
+class _InicioTab extends StatelessWidget {
+  final ValueChanged<Evento> onAbrirEvento;
+  final VoidCallback onPesquisar;
 
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-        ),
+  const _InicioTab({required this.onAbrirEvento, required this.onPesquisar});
 
-
-        title: _estaPesquisando
-            ? Padding(
-          padding: const EdgeInsets.only(right: 15),
-          child: TextField(
-            autofocus: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              hintText: 'Digitar pesquisa...',
-              hintStyle: TextStyle(color: Colors.white54),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.red),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 2),
-              ),
-            ),
-          ),
-        )
-            : Row(
-          children: [
-            Transform.translate(
-              offset: const Offset(-25, 5),
-              child: Image.asset(
-                'assets/images/logo_evena_s_fundo.png',
-                height: 130,
-              ),
-            ),
-            const SizedBox(width: 5),
-          ],
-        ),
-        actions: [
-          IconButton(
-              icon: Icon(
-                _estaPesquisando ? Icons.close : Icons.search,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                setState(() {
-                  _estaPesquisando = !_estaPesquisando;
-                });
-              }),
-        ],
-      ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Bem-vindo ao Evena!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Protótipo do app.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-           Row(
-            children: [
-            const Text(
-                'Destaques para você',
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Bem-vindo ao Evena!',
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
               color: Colors.white,
-              ),
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
             ),
-
-              const Spacer(),
-
-              BotaoVerMais(
-                aoClicar: () {
-                  print('Navegar para a tela de destaques');
-
-                },
-              )
-
-
-            ],
-           ),
-
-            const SizedBox(height: 10),
-
-            Container( //Container dos destaques ========================
-              width: double.infinity,
-              padding: const EdgeInsets.all(5),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Descubra experiências para viver de verdade.',
+            style: TextStyle(color: Colors.white60, fontSize: 14),
+          ),
+          const SizedBox(height: 18),
+          InkWell(
+            onTap: onPesquisar,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              height: 52,
               decoration: BoxDecoration(
                 color: const Color(0xFF140E32),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF7C2BDC).withValues(alpha: .35),
+                ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: const Row(
                 children: [
-                  Stack(
-                    children: [
-
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          'assets/images/evento1.jpg',
-                          height: 150,
-                          width: 150,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-
-                      Positioned(
-                        top: 8,
-                        left: 8,
-
-
-                        child: IconButton(
-                          onPressed: () {
-
-                            setState(() {
-                              _foiFavoritado = !_foiFavoritado;
-                            });
-                            print('Botão de dentro da imagem clicado');
-                          },
-                          icon: Icon(
-
-                            _foiFavoritado ? Icons.favorite : Icons.favorite_border,
-
-                            color: _foiFavoritado ? Color(0xFF65D13E) : Colors.white,
-                            size: 16,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.black54,
-                            minimumSize: const Size(32, 32),
-                            padding: EdgeInsets.zero,
-                            shape: const CircleBorder(),
-                          ),
-                        )
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(width: 10),
-
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container( // container data===========
-                              width: 37,
-                              height: 45,
-                              padding: EdgeInsets.zero,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF140B38),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: const Color(0xFF7C2BDC),
-                                  width: 1,
-                                ),
-                              ),
-                              child: const Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '24',
-                                      style: TextStyle(
-                                        color: Color(0xFF7C2BDC),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        height: 1.1,
-                                      ),
-                                    ),
-                                    SizedBox(height: 1),
-                                    Text(
-                                      'FEV',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        height: 1.1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            const Expanded(
-                              child: Text(
-                                'Evento de Marketing Digital',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              color: Color(0xFF8E68CD),
-                              size: 16,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              '19:00',
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white70),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 6),
-
-
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: Color(0xFF8E68CD),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 6),
-                            const Expanded(
-                              child: Text(
-                                'Hotel Trânsilvânia São Paulo - SP',
-                                style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white70),
-                              ),
-                            ),
-
-                            const SizedBox(width: 5),
-
-                            IconButton(
-                              onPressed: () {
-
-                                final eventoSelecionado = Evento(
-                                  id: '1',
-                                  titulo: 'Evento de Marketing Digital',
-                                  imagemUrl: 'assets/images/evento1.jpg',
-                                  dia: '24',
-                                  mes: 'FEV',
-                                  hora: '19:00',
-                                  local: 'Hotel Trânsilvânia ',
-                                  endereco: 'R. Oscar Freire, 3555 - Pinheiros, São Paulo - SP 05409-011',
-                                  formato: 'Presencial',
-                                  descricao: 'Aprenda as melhores estratégias de marketing digital para 2026 com especialistas do mercado!',
-                                );
-
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TelaDetalheEvento(
-                                      evento: eventoSelecionado,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                              style: IconButton.styleFrom(
-                                backgroundColor: const Color(0xFF251660),
-                                minimumSize: const Size(30, 30),
-                                padding: EdgeInsets.zero,
-                                shape: const CircleBorder(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  SizedBox(width: 15),
+                  Icon(Icons.search_rounded, color: Color(0xFF63D13E)),
+                  SizedBox(width: 10),
+                  Text(
+                    'Pesquisar eventos...',
+                    style: TextStyle(color: Colors.white54),
                   ),
                 ],
               ),
             ),
-
-            SizedBox(height: 30),
-          Row(
-            children: [
-            const Text('Categorias',
+          ),
+          const SizedBox(height: 26),
+          _TituloSecao(
+            titulo: 'Destaques para você',
+            quantidade: eventos.length,
+          ),
+          const SizedBox(height: 12),
+          CardEvento(
+            evento: eventos.first,
+            onTap: () => onAbrirEvento(eventos.first),
+          ),
+          const SizedBox(height: 26),
+          const Text(
+            'Categorias',
             style: TextStyle(
-              fontSize: 18,
               color: Colors.white,
-              fontWeight: FontWeight.w500,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
             ),
-            ),
-
-            const Spacer(),
-
-            BotaoVerMais(
-              aoClicar: () {
-                print('Navegar para a tela de todas as categorias');
-
-              },
-            ),
-          ],
-      ),//FECHAMENTO DO BODY
-
-
-
-
-            SizedBox(height: 10),
-
-          SingleChildScrollView(
+          ),
+          const SizedBox(height: 12),
+          const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-
-
             child: Row(
-              children: const [
-
+              children: [
                 CardCategoria(
                   caminhoImagem: 'assets/images/negocios.png',
                   texto: 'Networking',
                 ),
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/shows.png',
                   texto: 'Música',
                 ),
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/teatro.png',
                   texto: 'Teatro',
                 ),
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/viagem.png',
                   texto: 'Festival',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/educacao.png',
-                  texto: 'Educação',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/infantil.png',
-                  texto: 'Infantil',
                 ),
                 SizedBox(width: 10),
                 CardCategoria(
@@ -526,80 +326,176 @@ class _MyHomePageState extends State<MyHomePage> {
                   caminhoImagem: 'assets/images/gastronomia.png',
                   texto: 'Gastronomia',
                 ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/esportes.png',
-                  texto: 'Esportes',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/games.png',
-                  texto: 'Workshop',
-                ),
-                SizedBox(width: 10),
-
-
-
-
               ],
-            )
-          )
-
-          ],
-        ),
-      ),
-
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          indicatorColor: Colors.transparent,
-          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF63D13E), fontSize: 11, fontWeight: FontWeight.w600); // Diminuí um tiquinho a fonte pra caber melhor
-            }
-            return const TextStyle(color: Colors.white54, fontSize: 11);
-          }),
-        ),
-
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            ),
           ),
-          child: NavigationBar(
-            height: 65,
-            onDestinationSelected: (index) {
-              setState(() {
-                _indiceAtual = index;
-              });
-              print('Clicou na aba $index');
-            },
-            backgroundColor: const Color(0xFF181236),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            destinations: [
-              NavigationDestination(
-                icon: _construirIconeComLinha(Icons.home_outlined, 0),
-                selectedIcon: _construirIconeComLinha(Icons.home, 0),
-                label: 'Início',
-              ),
-              NavigationDestination(
-                icon: _construirIconeComLinha(Icons.favorite_border, 1),
-                selectedIcon: _construirIconeComLinha(Icons.favorite, 1),
-                label: 'Favoritos',
-              ),
-              NavigationDestination(
-                icon: _construirIconeComLinha(Icons.person_outline, 2),
-                selectedIcon: _construirIconeComLinha(Icons.person, 2),
-                label: 'Perfil',
-              ),
-            ],
+          const SizedBox(height: 28),
+          const Text(
+            'Próximos eventos',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          ...eventos
+              .skip(1)
+              .map(
+                (evento) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: CardEvento(
+                    evento: evento,
+                    compacto: true,
+                    onTap: () => onAbrirEvento(evento),
+                  ),
+                ),
+              ),
+        ],
       ),
-
-
-
-
     );
   }
 }
 
+class _TituloSecao extends StatelessWidget {
+  final String titulo;
+  final int quantidade;
+  const _TituloSecao({required this.titulo, required this.quantidade});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            titulo,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFF63D13E).withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '$quantidade eventos',
+            style: const TextStyle(
+              color: Color(0xFF63D13E),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FavoritosTab extends StatelessWidget {
+  final ValueChanged<Evento> onAbrirEvento;
+  const _FavoritosTab({required this.onAbrirEvento});
+
+  @override
+  Widget build(BuildContext context) {
+    final favoritos = FavoritosService.instance;
+
+    return AnimatedBuilder(
+      animation: favoritos,
+      builder: (context, _) {
+        final lista = eventos
+            .where((evento) => favoritos.contem(evento.id))
+            .toList();
+
+        if (lista.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(34),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.favorite_border_rounded,
+                    color: Colors.white24,
+                    size: 68,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Nenhum favorito ainda',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 7),
+                  Text(
+                    'Toque no coração de um evento e ele aparecerá aqui.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white54, height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
+          itemCount: lista.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final evento = lista[index];
+            return CardEvento(
+              evento: evento,
+              compacto: true,
+              onTap: () => onAbrirEvento(evento),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _PerfilTab extends StatelessWidget {
+  const _PerfilTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 42,
+            backgroundColor: Color(0xFF1D1544),
+            child: Icon(
+              Icons.person_rounded,
+              color: Color(0xFF63D13E),
+              size: 46,
+            ),
+          ),
+          SizedBox(height: 14),
+          Text(
+            'Seu perfil',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            'Área pronta para evoluir depois.',
+            style: TextStyle(color: Colors.white54),
+          ),
+        ],
+      ),
+    );
+  }
+}

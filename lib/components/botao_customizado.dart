@@ -16,9 +16,12 @@ class BotaoCustomizado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final Color corFundo = isSecundario ? const Color(0xFF000010) : const Color(0xFF5CD825);
-    final Color corTexto = isSecundario ? const Color(0XFFA62CFB) : Colors.black;
+    final Color corFundo = isSecundario
+        ? const Color(0xFF000010)
+        : const Color(0xFF5CD825);
+    final Color corTexto = isSecundario
+        ? const Color(0XFFA62CFB)
+        : Colors.black;
 
     return SizedBox(
       width: double.infinity,
@@ -40,29 +43,28 @@ class BotaoCustomizado extends StatelessWidget {
         ),
         child: temSeta
             ? Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const SizedBox(width: 20), // Para empurrar o texto para o centro
-            Text(
-              texto,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 20,
-            ),
-          ],
-        )
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                  ), // Para empurrar o texto para o centro
+                  Text(
+                    texto,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+                ],
+              )
             : Text(
-          texto,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+                texto,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }

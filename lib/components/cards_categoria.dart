@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-
-class CardCategoria extends StatelessWidget { //classe dos cards da categoria
+class CardCategoria extends StatelessWidget {
+  //classe dos cards da categoria
   final String caminhoImagem;
   final String texto;
-
 
   const CardCategoria({
     super.key,
@@ -51,5 +50,4 @@ class CardCategoria extends StatelessWidget { //classe dos cards da categoria
       ),
     );
   }
-
 }

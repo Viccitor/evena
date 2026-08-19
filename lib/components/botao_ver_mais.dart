@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-class BotaoVerMais extends StatelessWidget { //classe do botão ver Mais
+class BotaoVerMais extends StatelessWidget {
+  //classe do botão ver Mais
   final VoidCallback aoClicar;
   final String texto;
 

@@ -1,9 +1,7 @@
-
 import 'package:evena/components/botao_customizado.dart';
 import 'package:evena/screens/tela_login.dart';
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
-
 
 class TelaInicio extends StatefulWidget {
   const TelaInicio({super.key});
@@ -22,7 +20,8 @@ class _TelaInicioState extends State<TelaInicio> {
     {
       'tituloBranco': 'Conectando pessoas\n',
       'tituloVerde': 'a experiências inesquecíveis.',
-      'subtitulo': 'Descubra, organize e viva os melhores eventos da sua região.',
+      'subtitulo':
+          'Descubra, organize e viva os melhores eventos da sua região.',
     },
     {
       'tituloBranco': 'Sua agenda cheia de\n',
@@ -59,7 +58,6 @@ class _TelaInicioState extends State<TelaInicio> {
             ),
 
             const SizedBox(height: 20),
-
 
             SizedBox(
               height: 180,
@@ -129,7 +127,7 @@ class _TelaInicioState extends State<TelaInicio> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _slides.length,
-                    (index) => AnimatedContainer(
+                (index) => AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 7.0),
                   height: 8,
@@ -137,7 +135,7 @@ class _TelaInicioState extends State<TelaInicio> {
                   decoration: BoxDecoration(
                     color: _paginaAtual == index
                         ? const Color(0xFF63D13E)
-                          : const Color(0xFF3B1E78),
+                        : const Color(0xFF3B1E78),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -148,41 +146,40 @@ class _TelaInicioState extends State<TelaInicio> {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child:Column(
+              child: Column(
                 children: [
+                  BotaoCustomizado(
+                    texto: 'Começar',
+                    temSeta: true,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaCadastro(),
+                        ),
+                      );
+                    },
+                  ),
 
-              BotaoCustomizado(
-                texto: 'Começar',
-                temSeta: true,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TelaCadastro()),
-                  );
-                },
+                  const SizedBox(height: 20),
+
+                  BotaoCustomizado(
+                    texto: 'Já tenho conta',
+                    isSecundario: true,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaLogin(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-
-
-
-            const SizedBox(height: 20),
-
-            BotaoCustomizado(
-              texto: 'Já tenho conta',
-              isSecundario: true,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TelaLogin()),
-                );
-              },
             ),
-          ],
-        ),
-      ),
-
 
             SizedBox(height: 30),
-
           ],
         ),
       ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-
-
 class TelaEsqueceuSenha extends StatefulWidget {
   const TelaEsqueceuSenha({super.key});
 
@@ -25,8 +23,6 @@ class _TelaEsqueceuSenhaState extends State<TelaEsqueceuSenha> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-
               Center(
                 child: SizedBox(
                   height: 170,
@@ -54,24 +50,15 @@ class _TelaEsqueceuSenhaState extends State<TelaEsqueceuSenha> {
                       color: Colors.white,
                     ),
                     children: [
-                      TextSpan(
-                        text: 'Bem-vindo a ',
-                      ),
+                      TextSpan(text: 'Bem-vindo a '),
                       TextSpan(
                         text: 'TAMO FAZENDO!\n',
-                        style: TextStyle(
-                          color: Color(0xFF5CD825),
-                        ),
+                        style: TextStyle(color: Color(0xFF5CD825)),
                       ),
                     ],
                   ),
                 ),
               ),
-
-
-
-
-
             ],
           ),
         ),

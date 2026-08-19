@@ -3,6 +3,7 @@ import 'package:evena/components/campo_texto_customizado.dart';
 import 'package:evena/main.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:evena/screens/tela_cadastro.dart';
 
 import 'tela_esqueceu_senha.dart';
 
@@ -232,6 +233,43 @@ class _TelaLoginState extends State<TelaLogin> {
                   ),
                 ],
               ),
+              const SizedBox(height: 22),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TelaCadastro()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF63D13E),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                  ),
+                  child: const Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Não tem uma conta? ',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        TextSpan(
+                          text: 'Cadastre-se!',
+                          style: TextStyle(
+                            color: Color(0xFF63D13E),
+                            fontWeight: FontWeight.w800,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

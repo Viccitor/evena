@@ -1,10 +1,9 @@
-import 'package:evena/components/botao_customizado.dart';
+import'package:evena/components/botao_customizado.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
-import 'package:evena/main.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:evena/screens/tela_cadastro.dart';
-
+import 'package:evena/screens/tela_home.dart';
 import 'tela_esqueceu_senha.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -83,7 +82,7 @@ class _TelaLoginState extends State<TelaLogin> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Evena')),
+      MaterialPageRoute(builder: (context) => const TelaHome()),
       (route) => false,
     );
   }

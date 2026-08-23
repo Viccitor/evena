@@ -9,6 +9,8 @@ class Evento {
   final String descricao;
   final String formato;
   final String categoria;
+  final double latitude;
+  final double longitude;
 
   const Evento({
     required this.id,
@@ -21,6 +23,8 @@ class Evento {
     required this.descricao,
     required this.formato,
     required this.categoria,
+    required this.latitude,
+    required this.longitude,
   });
 
   String get dia => inicio.day.toString().padLeft(2, '0');

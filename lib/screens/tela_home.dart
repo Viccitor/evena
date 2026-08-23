@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:evena/models/evento.dart';
 import 'package:evena/data/eventos_data.dart';
 import 'package:evena/components/card_evento.dart';
@@ -9,7 +10,6 @@ import 'package:evena/screens/tela_inicio.dart';
 import 'package:evena/screens/tela_pesquisa.dart';
 import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
-import 'package:evena/components/botao_customizado.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -22,6 +22,11 @@ class _TelaHomeState extends State<TelaHome> {
   int _indiceAtual = 0;
   late final PageController _pageController;
 
+  // Estado da lista de eventos e localização
+  List<Evento> _listaEventos = List.from(eventos);
+  bool _carregandoLocalizacao = false;
+  Position? _posicaoAtual;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +37,84 @@ class _TelaHomeState extends State<TelaHome> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// Método responsável por pedir permissão e obter a localização do usuário
+  Future<void> _ativarLocalizacao() async {
+    setState(() => _carregandoLocalizacao = true);
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _mostrarSnackBar('Por favor, ative o GPS do seu celular.');
+        setState(() => _carregandoLocalizacao = false);
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _mostrarSnackBar('Permissão de localização negada.');
+          setState(() => _carregandoLocalizacao = false);
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _mostrarSnackBar(
+          'Permissões negadas permanentemente. Ative nas configurações do aparelho.',
+        );
+        setState(() => _carregandoLocalizacao = false);
+        return;
+      }
+
+      // Obtém a posição atual do aparelho
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      // Reordena os eventos com base na distância
+      List<Evento> eventosOrdenados = List.from(_listaEventos);
+      eventosOrdenados.sort((a, b) {
+        double distA = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          a.latitude,
+          a.longitude,
+        );
+        double distB = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          b.latitude,
+          b.longitude,
+        );
+        return distA.compareTo(distB);
+      });
+
+      setState(() {
+        _posicaoAtual = position;
+        _listaEventos = eventosOrdenados;
+        _carregandoLocalizacao = false;
+      });
+
+      _mostrarSnackBar('Eventos reordenados pela sua localização!');
+    } catch (e) {
+      _mostrarSnackBar('Erro ao obter localização: $e');
+      setState(() => _carregandoLocalizacao = false);
+    }
+  }
+
+  void _mostrarSnackBar(String mensagem) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: const Color(0xFF181236),
+      ),
+    );
   }
 
   void _abrirEvento(Evento evento) {
@@ -59,7 +142,14 @@ class _TelaHomeState extends State<TelaHome> {
   @override
   Widget build(BuildContext context) {
     final paginas = [
-      _InicioTab(onAbrirEvento: _abrirEvento, onPesquisar: _abrirPesquisa),
+      _InicioTab(
+        onAbrirEvento: _abrirEvento,
+        onPesquisar: _abrirPesquisa,
+        onAtivarLocalizacao: _ativarLocalizacao,
+        carregandoLocalizacao: _carregandoLocalizacao,
+        posicaoAtiva: _posicaoAtual != null,
+        eventos: _listaEventos,
+      ),
       FavoritosTab(onAbrirEvento: _abrirEvento),
       const PerfilTab(),
     ];
@@ -146,7 +236,7 @@ class _TelaHomeState extends State<TelaHome> {
   }
 
   Widget _buildDrawer() {
-    return Drawer( //navegacao lateral
+    return Drawer(
       backgroundColor: const Color(0xFF100B2A),
       child: SafeArea(
         child: ListView(
@@ -245,8 +335,19 @@ class _TelaHomeState extends State<TelaHome> {
 class _InicioTab extends StatelessWidget {
   final ValueChanged<Evento> onAbrirEvento;
   final VoidCallback onPesquisar;
+  final VoidCallback onAtivarLocalizacao;
+  final bool carregandoLocalizacao;
+  final bool posicaoAtiva;
+  final List<Evento> eventos;
 
-  const _InicioTab({required this.onAbrirEvento, required this.onPesquisar});
+  const _InicioTab({
+    required this.onAbrirEvento,
+    required this.onPesquisar,
+    required this.onAtivarLocalizacao,
+    required this.carregandoLocalizacao,
+    required this.posicaoAtiva,
+    required this.eventos,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -255,35 +356,31 @@ class _InicioTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Text.rich(
             TextSpan(
               text: 'Encontre os \n',
-
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 24,
                 color: Colors.white,
               ),
-
               children: const [
                 TextSpan(
-                  text: 'melhores eventos\n', // Parte 2 (destacada)
+                  text: 'melhores eventos\n',
                   style: TextStyle(
-                    color: Color(0xFF63D13E), // Sua cor verde
+                    color: Color(0xFF63D13E),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 TextSpan(
-                  text: 'em sua região \n', // Parte 2 (destacada)
+                  text: 'em sua região \n',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 TextSpan(
-                  text: 'Ative sua localização e descubra eventos incriveis perto de você!',
+                  text:
+                  'Ative sua localização e descubra eventos incríveis perto de você!',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 15,
@@ -293,81 +390,84 @@ class _InicioTab extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 15),
 
-        SizedBox(height: 15),
-
-        SizedBox(
-          width: 280,
-          child: Material(
-            color: const Color(0xFF63D13E),
-            borderRadius: BorderRadius.circular(13),
-            child: InkWell(
-              onTap: () {},
-              borderRadius: BorderRadius.circular(16),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.near_me_rounded,
-                      color: Colors.black,
-                      size: 22,
-                    ),
-
-                    SizedBox(width: 10),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-
-                          Text(
-                            'Ativar Localização',
-
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14, // Fonte menor
-                              fontWeight: FontWeight.bold,
-                            ),
-
-                          ),
-
-                          Text(
-
-                            'Para ver eventos perto de você',
-
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 11, // Fonte menor
-                              fontWeight: FontWeight.w500,
-                            ),
-
-                          ),
-
-                        ],
+          // Botão de Ativar Localização com Feedback de Carregamento
+          SizedBox(
+            width: 280,
+            child: Material(
+              color: const Color(0xFF63D13E),
+              borderRadius: BorderRadius.circular(13),
+              child: InkWell(
+                onTap: carregandoLocalizacao ? null : onAtivarLocalizacao,
+                borderRadius: BorderRadius.circular(13),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: carregandoLocalizacao
+                      ? const Center(
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                        strokeWidth: 2.5,
                       ),
                     ),
-
-                    SizedBox(width: 6),
-
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                  ],
+                  )
+                      : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        posicaoAtiva
+                            ? Icons.check_circle_rounded
+                            : Icons.near_me_rounded,
+                        color: Colors.black,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              posicaoAtiva
+                                  ? 'Localização Ativa'
+                                  : 'Ativar Localização',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              posicaoAtiva
+                                  ? 'Eventos ordenados por proximidade'
+                                  : 'Para ver eventos perto de você',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-
-
-
-
-
 
           const SizedBox(height: 25),
 
@@ -375,13 +475,13 @@ class _InicioTab extends StatelessWidget {
             titulo: 'Destaques para você',
             quantidade: eventos.length,
           ),
-
           const SizedBox(height: 12),
 
-          CardEvento(
-            evento: eventos.first,
-            onTap: () => onAbrirEvento(eventos.first),
-          ),
+          if (eventos.isNotEmpty)
+            CardEvento(
+              evento: eventos.first,
+              onTap: () => onAbrirEvento(eventos.first),
+            ),
 
           const SizedBox(height: 26),
 
@@ -393,57 +493,45 @@ class _InicioTab extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-
           const SizedBox(height: 12),
 
           const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/negocios.png',
                   texto: 'Networking',
                 ),
-
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/shows.png',
                   texto: 'Música',
                 ),
-
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/teatro.png',
                   texto: 'Teatro',
                 ),
-
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/viagem.png',
                   texto: 'Festival',
                 ),
-
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/tech.png',
                   texto: 'Tecnologia',
                 ),
-
                 SizedBox(width: 10),
-
                 CardCategoria(
                   caminhoImagem: 'assets/images/gastronomia.png',
                   texto: 'Gastronomia',
                 ),
-
               ],
             ),
           ),
+
           const SizedBox(height: 28),
           const Text(
             'Próximos eventos',
@@ -454,6 +542,7 @@ class _InicioTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+
           ...eventos
               .skip(1)
               .map(

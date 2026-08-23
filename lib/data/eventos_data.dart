@@ -10,9 +10,11 @@ final List<Evento> eventos = [
     local: 'Centro de Convenções Paulista',
     endereco: 'Av. Paulista, 1578 - Bela Vista, São Paulo - SP',
     descricao:
-        'Uma noite de conteúdo prático sobre marketing digital, conteúdo, tráfego pago e construção de marca com profissionais do mercado.',
+    'Uma noite de conteúdo prático sobre marketing digital, conteúdo, tráfego pago e construção de marca com profissionais do mercado.',
     formato: 'Presencial',
     categoria: 'Networking',
+    latitude: -23.561414,
+    longitude: -46.655881,
   ),
   Evento(
     id: '2',
@@ -22,11 +24,13 @@ final List<Evento> eventos = [
     fim: DateTime(2026, 9, 20, 23, 30),
     local: 'Parque Villa-Lobos',
     endereco:
-        'Av. Prof. Fonseca Rodrigues, 2001 - Alto de Pinheiros, São Paulo - SP',
+    'Av. Prof. Fonseca Rodrigues, 2001 - Alto de Pinheiros, São Paulo - SP',
     descricao:
-        'Festival ao ar livre com música, arte, gastronomia e experiências para curtir com os amigos.',
+    'Festival ao ar livre com música, arte, gastronomia e experiências para curtir com os amigos.',
     formato: 'Presencial',
     categoria: 'Música',
+    latitude: -23.545803,
+    longitude: -46.721471,
   ),
   Evento(
     id: '3',
@@ -37,9 +41,11 @@ final List<Evento> eventos = [
     local: 'Expo Center Norte',
     endereco: 'Rua José Bernardo Pinto, 333 - Vila Guilherme, São Paulo - SP',
     descricao:
-        'Tecnologia, inteligência artificial, desenvolvimento e produtos digitais em um dia inteiro de palestras e networking.',
+    'Tecnologia, inteligência artificial, desenvolvimento e produtos digitais em um dia inteiro de palestras e networking.',
     formato: 'Presencial',
     categoria: 'Tecnologia',
+    latitude: -23.515278,
+    longitude: -46.617222,
   ),
   Evento(
     id: '4',
@@ -50,9 +56,11 @@ final List<Evento> eventos = [
     local: 'Arena Hub',
     endereco: 'Al. Rio Claro, 241 - Bela Vista, São Paulo - SP',
     descricao:
-        'Encontro para quem gosta de games, programação e criação de experiências interativas.',
+    'Encontro para quem gosta de games, programação e criação de experiências interativas.',
     formato: 'Presencial',
     categoria: 'Workshop',
+    latitude: -23.562778,
+    longitude: -46.653889,
   ),
   Evento(
     id: '5',
@@ -63,9 +71,11 @@ final List<Evento> eventos = [
     local: 'Mercado Municipal',
     endereco: 'Rua da Cantareira, 306 - Centro Histórico, São Paulo - SP',
     descricao:
-        'Experiência gastronômica com chefs convidados, degustações e oficinas rápidas.',
+    'Experiência gastronômica com chefs convidados, degustações e oficinas rápidas.',
     formato: 'Presencial',
     categoria: 'Gastronomia',
+    latitude: -23.541806,
+    longitude: -46.629167,
   ),
   Evento(
     id: '6',
@@ -76,9 +86,11 @@ final List<Evento> eventos = [
     local: 'Cubo Itaú',
     endereco: 'Alameda Vicente Pinzon, 54 - Vila Olímpia, São Paulo - SP',
     descricao:
-        'Palestras, cases e rodas de conversa para quem quer tirar projetos do papel e conhecer novas pessoas.',
+    'Palestras, cases e rodas de conversa para quem quer tirar projetos do papel e conhecer novas pessoas.',
     formato: 'Presencial',
     categoria: 'Networking',
+    latitude: -23.595694,
+    longitude: -46.685361,
   ),
   Evento(
     id: '7',
@@ -89,9 +101,11 @@ final List<Evento> eventos = [
     local: 'Teatro Gazeta',
     endereco: 'Av. Paulista, 900 - Bela Vista, São Paulo - SP',
     descricao:
-        'Uma peça contemporânea sobre escolhas, encontros e tudo aquilo que muda quando a cidade desacelera.',
+    'Uma peça contemporânea sobre escolhas, encontros e tudo aquilo que muda quando a cidade desacelera.',
     formato: 'Presencial',
     categoria: 'Teatro',
+    latitude: -23.565417,
+    longitude: -46.650833,
   ),
   Evento(
     id: '8',
@@ -102,8 +116,10 @@ final List<Evento> eventos = [
     local: 'Shopping Center Norte',
     endereco: 'Travessa Casalbuono, 120 - Vila Guilherme, São Paulo - SP',
     descricao:
-        'Campeonatos, desafios, comunidade gamer e espaços para testar jogos e conhecer criadores.',
+    'Campeonatos, desafios, comunidade gamer e espaços para testar jogos e conhecer criadores.',
     formato: 'Presencial',
     categoria: 'Workshop',
+    latitude: -23.516389,
+    longitude: -46.618611,
   ),
 ];

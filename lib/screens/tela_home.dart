@@ -9,6 +9,7 @@ import 'package:evena/screens/tela_inicio.dart';
 import 'package:evena/screens/tela_pesquisa.dart';
 import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
+import 'package:evena/components/botao_customizado.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -145,7 +146,7 @@ class _TelaHomeState extends State<TelaHome> {
   }
 
   Widget _buildDrawer() {
-    return Drawer(
+    return Drawer( //navegacao lateral
       backgroundColor: const Color(0xFF100B2A),
       child: SafeArea(
         child: ListView(
@@ -254,17 +255,136 @@ class _InicioTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 6),
+
+          Text.rich(
+            TextSpan(
+              text: 'Encontre os \n',
+
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 24,
+                color: Colors.white,
+              ),
+
+              children: const [
+                TextSpan(
+                  text: 'melhores eventos\n', // Parte 2 (destacada)
+                  style: TextStyle(
+                    color: Color(0xFF63D13E), // Sua cor verde
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                TextSpan(
+                  text: 'em sua região \n', // Parte 2 (destacada)
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                TextSpan(
+                  text: 'Ative sua localização e descubra eventos incriveis perto de você!',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 15,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        SizedBox(height: 15),
+
+        SizedBox(
+          width: 280,
+          child: Material(
+            color: const Color(0xFF63D13E),
+            borderRadius: BorderRadius.circular(13),
+            child: InkWell(
+              onTap: () {},
+              borderRadius: BorderRadius.circular(16),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.near_me_rounded,
+                      color: Colors.black,
+                      size: 22,
+                    ),
+
+                    SizedBox(width: 10),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+
+                          Text(
+                            'Ativar Localização',
+
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14, // Fonte menor
+                              fontWeight: FontWeight.bold,
+                            ),
+
+                          ),
+
+                          Text(
+
+                            'Para ver eventos perto de você',
+
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 11, // Fonte menor
+                              fontWeight: FontWeight.w500,
+                            ),
+
+                          ),
+
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(width: 6),
+
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+
+
+
+
+
+
+          const SizedBox(height: 25),
+
           _TituloSecao(
             titulo: 'Destaques para você',
             quantidade: eventos.length,
           ),
+
           const SizedBox(height: 12),
+
           CardEvento(
             evento: eventos.first,
             onTap: () => onAbrirEvento(eventos.first),
           ),
+
           const SizedBox(height: 26),
+
           const Text(
             'Categorias',
             style: TextStyle(
@@ -273,40 +393,54 @@ class _InicioTab extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+
           const SizedBox(height: 12),
+
           const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/negocios.png',
                   texto: 'Networking',
                 ),
+
                 SizedBox(width: 10),
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/shows.png',
                   texto: 'Música',
                 ),
+
                 SizedBox(width: 10),
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/teatro.png',
                   texto: 'Teatro',
                 ),
+
                 SizedBox(width: 10),
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/viagem.png',
                   texto: 'Festival',
                 ),
+
                 SizedBox(width: 10),
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/tech.png',
                   texto: 'Tecnologia',
                 ),
+
                 SizedBox(width: 10),
+
                 CardCategoria(
                   caminhoImagem: 'assets/images/gastronomia.png',
                   texto: 'Gastronomia',
                 ),
+
               ],
             ),
           ),

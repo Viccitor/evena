@@ -11,6 +11,7 @@ import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,14 +111,21 @@ class _MyHomePageState extends State<MyHomePage> {
           indicatorColor: Colors.transparent,
           labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(
-                color: Color(0xFF63D13E),
+              // 🚀 Fonte Poppins aplicada no item selecionado
+              return GoogleFonts.poppins(
+                color: const Color(0xFF63D13E),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
               );
             }
-            return const TextStyle(color: Colors.white54, fontSize: 11);
+            // 🚀 Fonte Poppins aplicada no item não selecionado
+            return GoogleFonts.poppins(
+              color: Colors.white54,
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+            );
           }),
+
         ),
         child: NavigationBar(
           selectedIndex: _indiceAtual,
@@ -127,27 +135,35 @@ class _MyHomePageState extends State<MyHomePage> {
           onDestinationSelected: (index) =>
               setState(() => _indiceAtual = index),
           destinations: const [
+
             NavigationDestination(
               icon: Icon(Icons.home_outlined, color: Colors.white54),
               selectedIcon: Icon(Icons.home_rounded, color: Color(0xFF63D13E)),
               label: 'Início',
             ),
+
             NavigationDestination(
               icon: Icon(Icons.favorite_border_rounded, color: Colors.white54),
               selectedIcon: Icon(
                 Icons.favorite_rounded,
                 color: Color(0xFF63D13E),
               ),
+
               label: 'Favoritos',
+
             ),
+
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded, color: Colors.white54),
               selectedIcon: Icon(
                 Icons.person_rounded,
                 color: Color(0xFF63D13E),
               ),
+
               label: 'Perfil',
+
             ),
+
           ],
         ),
       ),
@@ -163,49 +179,69 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
-              child: Image.asset(
-                'assets/images/logo_evena_s_fundo.png',
-                height: 100,
-                alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 120,
+                width: double.infinity,
+                child: ClipRect(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/images/logo_evena_s_fundo.png',
+                    ),
+                  ),
+                ),
               ),
             ),
+
             ListTile(
               leading: const Icon(
                 Icons.home_outlined,
                 color: Color(0xFF63D13E),
               ),
+
               title: const Text(
                 'Início',
                 style: TextStyle(color: Colors.white),
               ),
+
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _indiceAtual = 0);
               },
+
             ),
+
             ListTile(
               leading: const Icon(
                 Icons.favorite_border_rounded,
                 color: Color(0xFF9A77D5),
               ),
+
               title: const Text(
                 'Favoritos',
                 style: TextStyle(color: Colors.white),
               ),
+
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _indiceAtual = 1);
               },
+
             ),
+
             ListTile(
+
               leading: const Icon(
                 Icons.person_add_alt_1_rounded,
                 color: Color(0xFF9A77D5),
               ),
+
               title: const Text(
                 'Cadastro / Login',
                 style: TextStyle(color: Colors.white),
               ),
+
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -213,7 +249,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (_) => const TelaInicio()),
                 );
               },
+
             ),
+
           ],
         ),
       ),
@@ -234,14 +272,17 @@ class _InicioTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Bem-vindo ao Evena!',
-            style: TextStyle(
+
+            style: GoogleFonts.lato(
+              fontSize: 34,
+              fontWeight: FontWeight.w600,
               color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
             ),
+
           ),
+
           const SizedBox(height: 5),
           const Text(
             'Descubra experiências para viver de verdade.',
@@ -447,7 +488,7 @@ class _FavoritosTab extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
           itemCount: lista.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final evento = lista[index];
             return CardEvento(

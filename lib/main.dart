@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:evena/screens/tela_home.dart'; // 🚀 Importe a tela criada
+import 'package:evena/screens/tela_home.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,9 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: const Color(0xFF080427),
+        textTheme: GoogleFonts.latoTextTheme(
+          ThemeData.dark().textTheme,
+        ),
       ),
       home: const TelaHome(),
     );

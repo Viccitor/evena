@@ -49,8 +49,8 @@ class _TelaHomeState extends State<TelaHome> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF01011D),
         iconTheme: const IconThemeData(color: Colors.white),
-        titleSpacing: 0,
-        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 88),
+        titleSpacing: -16,
+        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 120),
         actions: [
           if (_indiceAtual != 2)
             IconButton(
@@ -138,6 +138,7 @@ class _TelaHomeState extends State<TelaHome> {
                 ),
               ),
             ),
+
             ListTile(
               leading: const Icon(
                 Icons.home_outlined,
@@ -203,46 +204,9 @@ class _InicioTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Bem-vindo ao Evena!',
-            style: GoogleFonts.lato(
-              fontSize: 34,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Descubra experiências para viver de verdade.',
-            style: TextStyle(color: Colors.white60, fontSize: 14),
-          ),
-          const SizedBox(height: 18),
-          InkWell(
-            onTap: onPesquisar,
-            borderRadius: BorderRadius.circular(16),
-            child: Ink(
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF140E32),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF7C2BDC).withValues(alpha: .35),
-                ),
-              ),
-              child: const Row(
-                children: [
-                  SizedBox(width: 15),
-                  Icon(Icons.search_rounded, color: Color(0xFF63D13E)),
-                  SizedBox(width: 10),
-                  Text(
-                    'Pesquisar eventos...',
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 26),
+
+          const SizedBox(height: 6),
+
           _TituloSecao(
             titulo: 'Destaques para você',
             quantidade: eventos.length,

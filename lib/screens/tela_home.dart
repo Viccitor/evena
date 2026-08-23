@@ -19,6 +19,19 @@ class TelaHome extends StatefulWidget {
 
 class _TelaHomeState extends State<TelaHome> {
   int _indiceAtual = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _indiceAtual);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void _abrirEvento(Evento evento) {
     Navigator.push(
@@ -34,9 +47,16 @@ class _TelaHomeState extends State<TelaHome> {
     );
   }
 
+  void _mudarAba(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Usando as telas importadas diretamente na lista
     final paginas = [
       _InicioTab(onAbrirEvento: _abrirEvento, onPesquisar: _abrirPesquisa),
       FavoritosTab(onAbrirEvento: _abrirEvento),
@@ -50,7 +70,11 @@ class _TelaHomeState extends State<TelaHome> {
         backgroundColor: const Color(0xFF01011D),
         iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: -12,
-        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 120, fit:BoxFit.contain, ),
+        title: Image.asset(
+          'assets/images/logo_evena_s_fundo.png',
+          height: 120,
+          fit: BoxFit.contain,
+        ),
         actions: [
           if (_indiceAtual != 2)
             IconButton(
@@ -61,7 +85,13 @@ class _TelaHomeState extends State<TelaHome> {
           const SizedBox(width: 6),
         ],
       ),
-      body: IndexedStack(index: _indiceAtual, children: paginas),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() => _indiceAtual = index);
+        },
+        children: paginas,
+      ),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           indicatorColor: Colors.transparent,
@@ -85,8 +115,7 @@ class _TelaHomeState extends State<TelaHome> {
           height: 68,
           backgroundColor: const Color(0xFF181236),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          onDestinationSelected: (index) =>
-              setState(() => _indiceAtual = index),
+          onDestinationSelected: _mudarAba,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined, color: Colors.white54),
@@ -138,11 +167,9 @@ class _TelaHomeState extends State<TelaHome> {
                 ),
               ),
             ),
-
-            // Item: Início (Índice 0)
             ListTile(
               selected: _indiceAtual == 0,
-              selectedTileColor: const Color(0xFF1F1843), // Cor de fundo mais clara quando selecionado
+              selectedTileColor: const Color(0xFF1F1843),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -161,14 +188,12 @@ class _TelaHomeState extends State<TelaHome> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _indiceAtual = 0);
+                _mudarAba(0);
               },
             ),
-
-            // Item: Favoritos (Índice 1)
             ListTile(
               selected: _indiceAtual == 1,
-              selectedTileColor: const Color(0xFF1F1843), // Cor de fundo mais clara quando selecionado
+              selectedTileColor: const Color(0xFF1F1843),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -189,11 +214,9 @@ class _TelaHomeState extends State<TelaHome> {
               ),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _indiceAtual = 1);
+                _mudarAba(1);
               },
             ),
-
-            // Item: Cadastro / Login
             ListTile(
               leading: const Icon(
                 Icons.person_add_alt_1_rounded,
@@ -231,9 +254,7 @@ class _InicioTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           const SizedBox(height: 6),
-
           _TituloSecao(
             titulo: 'Destaques para você',
             quantidade: eventos.length,

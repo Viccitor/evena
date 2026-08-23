@@ -49,8 +49,8 @@ class _TelaHomeState extends State<TelaHome> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF01011D),
         iconTheme: const IconThemeData(color: Colors.white),
-        titleSpacing: -16,
-        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 120),
+        titleSpacing: -12,
+        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 120, fit:BoxFit.contain, ),
         actions: [
           if (_indiceAtual != 2)
             IconButton(
@@ -139,42 +139,69 @@ class _TelaHomeState extends State<TelaHome> {
               ),
             ),
 
+            // Item: Início (Índice 0)
             ListTile(
-              leading: const Icon(
-                Icons.home_outlined,
-                color: Color(0xFF63D13E),
+              selected: _indiceAtual == 0,
+              selectedTileColor: const Color(0xFF1F1843), // Cor de fundo mais clara quando selecionado
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              title: const Text(
+              leading: Icon(
+                _indiceAtual == 0 ? Icons.home_rounded : Icons.home_outlined,
+                color: _indiceAtual == 0
+                    ? const Color(0xFF63D13E)
+                    : Colors.white60,
+              ),
+              title: Text(
                 'Início',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: _indiceAtual == 0 ? Colors.white : Colors.white70,
+                  fontWeight: _indiceAtual == 0 ? FontWeight.w700 : FontWeight.w400,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _indiceAtual = 0);
               },
             ),
+
+            // Item: Favoritos (Índice 1)
             ListTile(
-              leading: const Icon(
-                Icons.favorite_border_rounded,
-                color: Color(0xFF9A77D5),
+              selected: _indiceAtual == 1,
+              selectedTileColor: const Color(0xFF1F1843), // Cor de fundo mais clara quando selecionado
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              title: const Text(
+              leading: Icon(
+                _indiceAtual == 1
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                color: _indiceAtual == 1
+                    ? const Color(0xFF63D13E)
+                    : Colors.white60,
+              ),
+              title: Text(
                 'Favoritos',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: _indiceAtual == 1 ? Colors.white : Colors.white70,
+                  fontWeight: _indiceAtual == 1 ? FontWeight.w700 : FontWeight.w400,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _indiceAtual = 1);
               },
             ),
+
+            // Item: Cadastro / Login
             ListTile(
               leading: const Icon(
                 Icons.person_add_alt_1_rounded,
-                color: Color(0xFF9A77D5),
+                color: Colors.white60,
               ),
               title: const Text(
                 'Cadastro / Login',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white70),
               ),
               onTap: () {
                 Navigator.pop(context);

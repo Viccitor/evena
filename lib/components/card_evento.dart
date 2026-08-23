@@ -200,7 +200,7 @@ class _InfoLinha extends StatelessWidget {
             texto,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white70, fontSize: 10.5),
+            style: const TextStyle(color: Colors.white70, fontSize: 13.5),
           ),
         ),
       ],

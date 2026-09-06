@@ -62,7 +62,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
     }
 
     if (_senhaController.text != _confirmarSenhaController.text) {
-      return 'As senhas nÃ£o sÃ£o iguais.';
+      return 'As senhas não são iguais.';
     }
 
     return null;
@@ -164,7 +164,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       ),
                     ),
                     TextSpan(
-                      text: 'Ã‰ rÃ¡pido e fÃ¡cil!',
+                      text: 'É rápido e fácil!',
                       style: TextStyle(
                         fontWeight: FontWeight.w300,
                         color: Colors.white70,
@@ -204,7 +204,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
               const SizedBox(height: 20),
               CampoTextoCustomizado(
                 titulo: 'Senha',
-                labelText: 'MÃ­n. 8, maiÃºscula, minÃºscula e nÃºmero',
+                labelText: 'Mín. 8, maiúscula, minúscula e número',
                 prefixIcon: Icons.lock_outline,
                 isSenha: true,
                 controller: _senhaController,
@@ -250,7 +250,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       ),
                       TextSpan(text: ' e a '),
                       TextSpan(
-                        text: 'PolÃ­tica de Privacidade',
+                        text: 'Política de Privacidade',
                         style: TextStyle(
                           color: Color(0xFF5CD825),
                           decoration: TextDecoration.underline,
@@ -290,7 +290,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       fontWeight: FontWeight.w400,
                     ),
                     children: [
-                      const TextSpan(text: 'JÃ¡ tem uma conta?'),
+                      const TextSpan(text: 'Já tem uma conta?'),
                       TextSpan(
                         text: ' Entrar',
                         style: const TextStyle(

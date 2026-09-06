@@ -98,6 +98,6 @@ class ApiService {
       throw ApiException(data['erro'].toString());
     }
 
-    throw ApiException('NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o.');
+    throw ApiException('Não foi possível concluir a operação.');
   }
 }

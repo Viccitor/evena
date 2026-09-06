@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
             NavigationDestination(
               icon: Icon(Icons.home_outlined, color: Colors.white54),
               selectedIcon: Icon(Icons.home_rounded, color: Color(0xFF63D13E)),
-              label: 'InÃ­cio',
+              label: 'Início',
             ),
             NavigationDestination(
               icon: Icon(Icons.favorite_border_rounded, color: Colors.white54),
@@ -186,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Color(0xFF63D13E),
               ),
               title: const Text(
-                'InÃ­cio',
+                'Início',
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
@@ -269,7 +269,7 @@ class _InicioTab extends StatelessWidget {
         if (eventos.isEmpty) {
           return const Center(
             child: Text(
-              'Nenhum evento disponÃ­vel.',
+              'Nenhum evento disponível.',
               style: TextStyle(color: Colors.white70),
             ),
           );
@@ -293,7 +293,7 @@ class _InicioTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 const Text(
-                  'Descubra experiÃªncias para viver de verdade.',
+                  'Descubra experiências para viver de verdade.',
                   style: TextStyle(color: Colors.white60, fontSize: 14),
                 ),
                 const SizedBox(height: 18),
@@ -324,7 +324,7 @@ class _InicioTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 26),
                 _TituloSecao(
-                  titulo: 'Destaques para vocÃª',
+                  titulo: 'Destaques para você',
                   quantidade: eventos.length,
                 ),
                 const SizedBox(height: 12),
@@ -353,7 +353,7 @@ class _InicioTab extends StatelessWidget {
                       SizedBox(width: 10),
                       CardCategoria(
                         caminhoImagem: 'assets/images/shows.png',
-                        texto: 'MÃºsica',
+                        texto: 'Música',
                       ),
                       SizedBox(width: 10),
                       CardCategoria(
@@ -380,7 +380,7 @@ class _InicioTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
                 const Text(
-                  'PrÃ³ximos eventos',
+                  'Próximos eventos',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -489,7 +489,7 @@ class _FavoritosTab extends StatelessWidget {
                   ),
                   SizedBox(height: 7),
                   Text(
-                    'Toque no coraÃ§Ã£o de um evento e ele aparecerÃ¡ aqui.',
+                    'Toque no coração de um evento e ele aparecerá aqui.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white54, height: 1.4),
                   ),
@@ -543,7 +543,7 @@ class _PerfilTab extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               const Text(
-                'VocÃª ainda nÃ£o entrou',
+                'Você ainda não entrou',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,

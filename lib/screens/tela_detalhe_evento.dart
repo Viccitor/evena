@@ -20,7 +20,7 @@ class TelaDetalheEvento extends StatelessWidget {
       'query': evento.endereco,
     });
 
-    await _abrirUrl(context, uri, 'NÃ£o foi possÃ­vel abrir o Google Maps.');
+    await _abrirUrl(context, uri, 'Não foi possível abrir o Google Maps.');
   }
 
   Future<void> _abrirGoogleCalendar(BuildContext context) async {
@@ -35,7 +35,7 @@ class TelaDetalheEvento extends StatelessWidget {
     await _abrirUrl(
       context,
       uri,
-      'NÃ£o foi possÃ­vel abrir o Google Calendar.',
+      'Não foi possível abrir o Google Calendar.',
     );
   }
 
@@ -103,7 +103,7 @@ class TelaDetalheEvento extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'NÃ£o foi possÃ­vel atualizar os favoritos.',
+                          'Não foi possível atualizar os favoritos.',
                         ),
                       ),
                     );
@@ -198,7 +198,7 @@ class TelaDetalheEvento extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${evento.dia} ${evento.mes} â€¢ ${evento.hora}',
+                          '${evento.dia} ${evento.mes} • ${evento.hora}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
@@ -207,7 +207,7 @@ class TelaDetalheEvento extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         const Text(
-                          'Adicione para nÃ£o esquecer',
+                          'Adicione para não esquecer',
                           style: TextStyle(color: Colors.white54, fontSize: 12),
                         ),
                       ],
@@ -244,7 +244,7 @@ class TelaDetalheEvento extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'InformaÃ§Ãµes',
+              'Informações',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -292,7 +292,7 @@ class TelaDetalheEvento extends StatelessWidget {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        'LocalizaÃ§Ã£o',
+                        'Localização',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,

@@ -22,7 +22,7 @@ class AuthService {
     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
     if (!regex.hasMatch(valor)) {
-      return 'Digite um e-mail vÃ¡lido.';
+      return 'Digite um e-mail válido.';
     }
 
     return null;
@@ -34,15 +34,15 @@ class AuthService {
     }
 
     if (!RegExp(r'[A-Z]').hasMatch(senha)) {
-      return 'Adicione pelo menos uma letra maiÃºscula.';
+      return 'Adicione pelo menos uma letra maiúscula.';
     }
 
     if (!RegExp(r'[a-z]').hasMatch(senha)) {
-      return 'Adicione pelo menos uma letra minÃºscula.';
+      return 'Adicione pelo menos uma letra minúscula.';
     }
 
     if (!RegExp(r'[0-9]').hasMatch(senha)) {
-      return 'Adicione pelo menos um nÃºmero.';
+      return 'Adicione pelo menos um número.';
     }
 
     return null;
@@ -82,7 +82,7 @@ class AuthService {
     } on ApiException catch (erro) {
       return erro.mensagem;
     } catch (_) {
-      return 'NÃ£o foi possÃ­vel conectar com a API.';
+      return 'Não foi possível conectar com a API.';
     }
   }
 
@@ -103,7 +103,7 @@ class AuthService {
     } on ApiException catch (erro) {
       return erro.mensagem;
     } catch (_) {
-      return 'NÃ£o foi possÃ­vel conectar com a API.';
+      return 'Não foi possível conectar com a API.';
     }
   }
 
@@ -121,7 +121,7 @@ class AuthService {
     } on ApiException catch (erro) {
       return erro.mensagem;
     } catch (_) {
-      return 'NÃ£o foi possÃ­vel conectar com a API.';
+      return 'Não foi possível conectar com a API.';
     }
   }
 

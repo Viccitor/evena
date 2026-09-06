@@ -30,7 +30,7 @@ class EventoService extends ChangeNotifier {
     } on ApiException catch (erro) {
       _erro = erro.mensagem;
     } catch (_) {
-      _erro = 'NÃ£o foi possÃ­vel conectar com a API.';
+      _erro = 'Não foi possível conectar com a API.';
     } finally {
       _carregando = false;
       notifyListeners();
@@ -54,7 +54,7 @@ class EventoService extends ChangeNotifier {
   }
 
   String _normalizar(String texto) {
-    const comAcento = 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§';
+    const comAcento = 'áàãâäéèêëíìîïóòõôöúùûüç';
     const semAcento = 'aaaaaeeeeiiiiooooouuuuc';
     var valor = texto.toLowerCase();
 

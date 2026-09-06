@@ -153,7 +153,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         style: TextStyle(color: Color(0xFF5CD825)),
                       ),
                       TextSpan(
-                        text: 'FaÃ§a login para continuar',
+                        text: 'Faça login para continuar',
                         style: TextStyle(
                           fontWeight: FontWeight.w300,
                           color: Colors.white70,
@@ -276,7 +276,7 @@ class _TelaLoginState extends State<TelaLogin> {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: 'NÃ£o tem uma conta? ',
+                          text: 'Não tem uma conta? ',
                           style: TextStyle(color: Colors.white70),
                         ),
                         TextSpan(

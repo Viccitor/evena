@@ -40,7 +40,7 @@ class _TelaEsqueceuSenhaState extends State<TelaEsqueceuSenha> {
     }
 
     if (_senhaController.text != _confirmarController.text) {
-      _mensagem('As senhas nÃ£o sÃ£o iguais.');
+      _mensagem('As senhas não são iguais.');
       return;
     }
 
@@ -120,7 +120,7 @@ class _TelaEsqueceuSenhaState extends State<TelaEsqueceuSenha> {
             const SizedBox(height: 18),
             CampoTextoCustomizado(
               titulo: 'Nova senha',
-              labelText: 'MÃ­n. 8, maiÃºscula, minÃºscula e nÃºmero',
+              labelText: 'Mín. 8, maiúscula, minúscula e número',
               prefixIcon: Icons.lock_outline,
               isSenha: true,
               controller: _senhaController,

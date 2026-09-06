@@ -89,7 +89,7 @@ class CardEvento extends StatelessWidget {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'NÃ£o foi possÃ­vel atualizar os favoritos.',
+                                      'Não foi possível atualizar os favoritos.',
                                     ),
                                   ),
                                 );

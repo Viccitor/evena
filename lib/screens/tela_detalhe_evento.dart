@@ -1,354 +1,336 @@
-import 'package:flutter/material.dart';
 import 'package:evena/models/evento.dart';
-import 'package:evena/components/botao_ver_mais.dart';
-import 'package:evena/components/card_secao.dart';
+import 'package:evena/services/favoritos_service.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class TelaDetalheEvento extends StatefulWidget {
+class TelaDetalheEvento extends StatelessWidget {
   final Evento evento;
 
   const TelaDetalheEvento({super.key, required this.evento});
 
-  @override
-  State<TelaDetalheEvento> createState() => _TelaDetalheEventoState();
-}
+  String _dois(int valor) => valor.toString().padLeft(2, '0');
 
-class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
-  bool _estaExpandido = false;
+  String _dataGoogle(DateTime data) {
+    return '${data.year}${_dois(data.month)}${_dois(data.day)}T${_dois(data.hour)}${_dois(data.minute)}${_dois(data.second)}';
+  }
+
+  Future<void> _abrirGoogleMaps(BuildContext context) async {
+    final uri = Uri.https('www.google.com', '/maps/search/', {
+      'api': '1',
+      'query': evento.endereco,
+    });
+
+    await _abrirUrl(context, uri, 'NÃ£o foi possÃ­vel abrir o Google Maps.');
+  }
+
+  Future<void> _abrirGoogleCalendar(BuildContext context) async {
+    final uri = Uri.https('calendar.google.com', '/calendar/render', {
+      'action': 'TEMPLATE',
+      'text': evento.titulo,
+      'dates': '${_dataGoogle(evento.inicio)}/${_dataGoogle(evento.fim)}',
+      'details': evento.descricao,
+      'location': '${evento.local} - ${evento.endereco}',
+    });
+
+    await _abrirUrl(
+      context,
+      uri,
+      'NÃ£o foi possÃ­vel abrir o Google Calendar.',
+    );
+  }
+
+  Future<void> _abrirUrl(BuildContext context, Uri uri, String erro) async {
+    final abriu = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+    if (!abriu && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
+    }
+  }
+
+  Widget _imagem() {
+    if (evento.imagemUrl.startsWith('http://') ||
+        evento.imagemUrl.startsWith('https://')) {
+      return Image.network(
+        evento.imagemUrl,
+        width: double.infinity,
+        height: 235,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallbackImagem(),
+      );
+    }
+
+    return Image.asset(
+      evento.imagemUrl,
+      width: double.infinity,
+      height: 235,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _fallbackImagem(),
+    );
+  }
+
+  Widget _fallbackImagem() {
+    return Container(
+      width: double.infinity,
+      height: 235,
+      color: const Color(0xFF251660),
+      child: const Icon(Icons.event_rounded, color: Colors.white38, size: 58),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF02010F),
+    final favoritos = FavoritosService.instance;
 
+    return Scaffold(
+      backgroundColor: const Color(0xFF080427),
       appBar: AppBar(
         backgroundColor: const Color(0xFF01011D),
-        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: 0,
-        title: Row(
-          children: [
-            Transform.translate(
-              offset: const Offset(-15, 5),
-              child: Image.asset(
-                'assets/images/logo_evena_s_fundo.png',
-                height: 130,
-              ),
-            ),
-          ],
-        ),
-      ),
+        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 82),
+        actions: [
+          AnimatedBuilder(
+            animation: favoritos,
+            builder: (context, _) {
+              final favoritado = favoritos.contem(evento.id);
 
+              return IconButton(
+                tooltip: favoritado ? 'Remover dos favoritos' : 'Favoritar',
+                onPressed: () async {
+                  final sucesso = await favoritos.alternar(evento.id);
+
+                  if (!sucesso && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'NÃ£o foi possÃ­vel atualizar os favoritos.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: Icon(
+                  favoritado ? Icons.favorite : Icons.favorite_border_rounded,
+                  color: favoritado ? const Color(0xFF63D13E) : Colors.white,
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
-
-            // IMAGEM COM A BORDA E O TEXTO POR CIMA
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  border: Border.all(
-                    color: const Color(0xFF7C2BDC),
-                    width: 1.0,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14.0),
-                  child: Stack(
-                    children: [
-                      // 1. Imagem do evento no fundo
-                      Image.asset(
-                        widget.evento.imagemUrl,
-                        width: double.infinity,
-                        height: 220,
-                        fit: BoxFit.cover,
-                      ),
-
-                      // 2. Gradiente escuro na parte inferior
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withValues(alpha: 0.5),
-                                Colors.black.withValues(alpha: 0.85),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Positioned como FILHO DIRETO do Stack
-                      Positioned(
-                        bottom: 12,
-                        left: 12,
-                        right: 12,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Título do evento
-                            Text(
-                              widget.evento.titulo,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            // Ícone e Localização
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on_outlined,
-                                  color: Color(0xFF8E68CD),
-                                  size: 19,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    widget.evento.local,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  _imagem(),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: .86),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF63D13E),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            evento.categoria,
+                            style: const TextStyle(
+                              color: Color(0xFF071008),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 9),
+                        Text(
+                          evento.titulo,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            height: 1.08,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            // CONTEÚDO E DETALHES DO EVENTO
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const SizedBox(height: 18),
+            _CardInfo(
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_month_rounded,
+                    color: Color(0xFF63D13E),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${evento.dia} ${evento.mes} â€¢ ${evento.hora}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        const Text(
+                          'Adicione para nÃ£o esquecer',
+                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _abrirGoogleCalendar(context),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Agenda'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF63D13E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Sobre o evento',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              evento.descricao,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'InformaÃ§Ãµes',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _MiniInfo(
+                    icon: Icons.event_seat_outlined,
+                    titulo: 'FORMATO',
+                    valor: evento.formato,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _MiniInfo(
+                    icon: Icons.people_outline,
+                    titulo: 'IDADE',
+                    valor: evento.classificacao,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: _MiniInfo(
+                    icon: Icons.confirmation_number_outlined,
+                    titulo: 'TIPO',
+                    valor: 'Evento',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _CardInfo(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Data do Evento
-                  Row(
+                  const Row(
                     children: [
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        color: Color(0xFF63D13E),
-                        size: 18,
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: Color(0xFF9A77D5),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Text(
-                        'Data: ${widget.evento.dia} de ${widget.evento.mes} às ${widget.evento.hora}',
-                        style: const TextStyle(
-                          color: Color(0xFF63D13E),
-                          fontWeight: FontWeight.w500,
+                        'LocalizaÃ§Ã£o',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // CARD: SOBRE O EVENTO
-                  CardSecao(
-                    titulo: 'Sobre o evento',
-                    icone: Icons.info_outline,
-                    conteudo: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final estiloTexto = const TextStyle(
-                          color: Colors.white70,
-                          height: 1.4,
-                          fontSize: 13,
-                        );
-
-                        final textPainter = TextPainter(
-                          text: TextSpan(
-                              text: widget.evento.descricao,
-                              style: estiloTexto),
-                          maxLines: 3,
-                          textDirection: TextDirection.ltr,
-                        )..layout(maxWidth: constraints.maxWidth);
-
-                        final ultrapassouLimite =
-                            textPainter.didExceedMaxLines;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.evento.descricao,
-                              maxLines: _estaExpandido ? null : 3,
-                              overflow: _estaExpandido
-                                  ? TextOverflow.visible
-                                  : TextOverflow.ellipsis,
-                              style: estiloTexto,
-                            ),
-                            if (ultrapassouLimite) ...[
-                              const SizedBox(height: 8),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: BotaoVerMais(
-                                  texto: _estaExpandido
-                                      ? 'Ver menos <'
-                                      : 'Ver mais >',
-                                  aoClicar: () {
-                                    setState(() {
-                                      _estaExpandido = !_estaExpandido;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
+                  const SizedBox(height: 12),
+                  Text(
+                    evento.local,
+                    style: const TextStyle(
+                      color: Color(0xFF63D13E),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-
-                  CardSecao(
-                    titulo: 'Informações Gerais',
-                    icone: Icons.star_outline_outlined,
-                    conteudo: Row(
-                      children: [
-                        //  Card Formato
-                        _buildItemInfo(
-                          icone: Icons.devices_outlined,
-                          titulo: 'FORMATO',
-                          dado: widget.evento.formato,
+                  const SizedBox(height: 4),
+                  Text(
+                    evento.endereco,
+                    style: const TextStyle(color: Colors.white60, height: 1.35),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _abrirGoogleMaps(context),
+                      icon: const Icon(Icons.directions_outlined),
+                      label: const Text('Abrir no Google Maps'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF7C2BDC)),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 8),
-
-                        // Card Faixa Etária
-                        _buildItemInfo(
-                          icone: Icons.people_outline,
-                          titulo: 'FAIXA ETÁRIA',
-                          dado: 'Livre',
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Card Tipo
-                        _buildItemInfo(
-                          icone: Icons.confirmation_number_outlined,
-                          titulo: 'TIPO',
-                          dado: 'Ingresso',
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-
-                  CardSecao(
-                    titulo: 'Localização',
-                    icone: Icons.pin_drop_outlined,
-
-                    conteudo: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-
-                        // Texto do local e endereço
-                        Expanded(
-
-                          child: RichText(
-
-                            text: TextSpan(
-
-                              style: const TextStyle(
-                                height: 1.4,
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-
-                              children: [
-
-                                TextSpan(
-                                  text: '${widget.evento.local}\n',
-
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF63D13E),
-                                  ),
-
-                                ),
-
-                                TextSpan(
-                                  text: widget.evento.endereco,
-                                  style: const TextStyle(
-
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-
-                                ),
-
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        // Botao Como chegar
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            final enderecoCompleto = ' ${widget.evento.endereco}';
-                            _abrirGoogleMaps(enderecoCompleto);
-                            // Ação ao clicar (ex: abrir Google Maps)
-                          },
-
-                          icon: const Icon(
-                            Icons.directions_outlined,
-                            size: 16,
-                            color: Color(0xFF8540C6),
-                          ),
-
-                          label: const Text(
-                            'Como chegar',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            side: BorderSide(
-                              color: const Color(0xFF7C2BDC).withValues(alpha: 0.5),
-                            ),
-
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-
                 ],
               ),
             ),
@@ -357,75 +339,74 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
       ),
     );
   }
+}
 
+class _CardInfo extends StatelessWidget {
+  final Widget child;
 
-  Widget _buildItemInfo({
-    required IconData icone,
-    required String titulo,
-    required String? dado,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFF140E32),
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(
-            color: const Color(0xFF7C2BDC).withValues(alpha: 0.2),
-            width: 1.0,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icone,
-              color: const Color(0xFF8E68CD),
-              size: 20,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              titulo,
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: Colors.white54,
-                letterSpacing: 0.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              dado ?? '-',
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+  const _CardInfo({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFF140E32),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF7C2BDC).withValues(alpha: .28),
         ),
       ),
+      child: child,
     );
   }
 }
 
-Future<void> _abrirGoogleMaps(String endereco) async {
-  // 🚀 Codifica o texto para ser seguro em URLs (espaços viram %20, etc.)
-  final String query = Uri.encodeComponent(endereco);
+class _MiniInfo extends StatelessWidget {
+  final IconData icon;
+  final String titulo;
+  final String valor;
 
-  // 🚀 Link oficial de busca do Google Maps:
-  final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+  const _MiniInfo({
+    required this.icon,
+    required this.titulo,
+    required this.valor,
+  });
 
-  try {
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint('Não foi possível abrir a URL: $url');
-    }
-  } catch (e) {
-    debugPrint('Erro ao tentar abrir o mapa: $e');
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF140E32),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFF9A77D5)),
+          const SizedBox(height: 7),
+          Text(
+            titulo,
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            valor,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

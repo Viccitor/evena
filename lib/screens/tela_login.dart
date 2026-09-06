@@ -1,7 +1,9 @@
 import 'package:evena/components/botao_customizado.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
 import 'package:evena/main.dart';
+import 'package:evena/screens/tela_cadastro.dart';
 import 'package:evena/services/auth_service.dart';
+import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/material.dart';
 
 import 'tela_esqueceu_senha.dart';
@@ -40,22 +42,22 @@ class _TelaLoginState extends State<TelaLogin> {
 
   bool _emailAlterado = false;
   bool _senhaAlterada = false;
+  bool _carregando = false;
 
   String? get _erroEmail {
-    if (!_emailAlterado) return null;
+    if (!_emailAlterado) {
+      return null;
+    }
+
     return AuthService.validarEmailDeLogin(_emailController.text);
   }
 
   String? get _erroSenha {
-    if (!_senhaAlterada) return null;
+    if (!_senhaAlterada) {
+      return null;
+    }
 
-    final erroEmail = AuthService.validarEmailDeLogin(_emailController.text);
-    if (erroEmail != null) return null;
-
-    return AuthService.validarSenhaDeLogin(
-      _emailController.text,
-      _senhaController.text,
-    );
+    return AuthService.validarSenhaDeLogin(_senhaController.text);
   }
 
   @override
@@ -65,24 +67,43 @@ class _TelaLoginState extends State<TelaLogin> {
     super.dispose();
   }
 
-  void _entrar() {
+  Future<void> _entrar() async {
     setState(() {
       _emailAlterado = true;
       _senhaAlterada = true;
     });
 
-    final erro = AuthService.entrar(
+    if (_erroEmail != null || _erroSenha != null || _carregando) {
+      return;
+    }
+
+    setState(() => _carregando = true);
+
+    final erro = await AuthService.entrar(
       email: _emailController.text,
       senha: _senhaController.text,
     );
 
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _carregando = false);
+
     if (erro != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
+      return;
+    }
+
+    await FavoritosService.instance.carregar();
+
+    if (!mounted) {
       return;
     }
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Evena')),
+      MaterialPageRoute(builder: (_) => const MyHomePage(title: 'Evena')),
       (route) => false,
     );
   }
@@ -132,7 +153,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         style: TextStyle(color: Color(0xFF5CD825)),
                       ),
                       TextSpan(
-                        text: 'Fa\u00e7a login para continuar',
+                        text: 'FaÃ§a login para continuar',
                         style: TextStyle(
                           fontWeight: FontWeight.w300,
                           color: Colors.white70,
@@ -179,7 +200,7 @@ class _TelaLoginState extends State<TelaLogin> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TelaEsqueceuSenha(),
+                        builder: (_) => const TelaEsqueceuSenha(),
                       ),
                     );
                   },
@@ -195,7 +216,10 @@ class _TelaLoginState extends State<TelaLogin> {
                 ),
               ),
               const SizedBox(height: 30),
-              BotaoCustomizado(texto: 'Entrar', onPressed: _entrar),
+              BotaoCustomizado(
+                texto: _carregando ? 'Entrando...' : 'Entrar',
+                onPressed: _carregando ? null : _entrar,
+              ),
               const SizedBox(height: 20),
               const Row(
                 children: [
@@ -232,6 +256,43 @@ class _TelaLoginState extends State<TelaLogin> {
                   ),
                 ],
               ),
+              const SizedBox(height: 22),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TelaCadastro()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF63D13E),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                  ),
+                  child: const Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'NÃ£o tem uma conta? ',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        TextSpan(
+                          text: 'Cadastre-se!',
+                          style: TextStyle(
+                            color: Color(0xFF63D13E),
+                            fontWeight: FontWeight.w800,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

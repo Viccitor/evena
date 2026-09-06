@@ -2,6 +2,7 @@ import 'package:evena/components/botao_customizado.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
 import 'package:evena/main.dart';
 import 'package:evena/services/auth_service.dart';
+import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   bool _emailAlterado = false;
   bool _senhaAlterada = false;
   bool _confirmacaoAlterada = false;
+  bool _carregando = false;
 
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
@@ -27,29 +29,40 @@ class _TelaCadastroState extends State<TelaCadastro> {
   final _confirmarSenhaController = TextEditingController();
 
   String? get _erroNome {
-    if (!_nomeAlterado) return null;
+    if (!_nomeAlterado) {
+      return null;
+    }
+
     return _nomeController.text.trim().isEmpty ? 'Digite seu nome.' : null;
   }
 
   String? get _erroEmail {
-    if (!_emailAlterado) return null;
+    if (!_emailAlterado) {
+      return null;
+    }
+
     return AuthService.validarEmail(_emailController.text);
   }
 
   String? get _erroSenha {
-    if (!_senhaAlterada) return null;
+    if (!_senhaAlterada) {
+      return null;
+    }
+
     return AuthService.validarSenha(_senhaController.text);
   }
 
   String? get _erroConfirmacao {
-    if (!_confirmacaoAlterada) return null;
+    if (!_confirmacaoAlterada) {
+      return null;
+    }
 
     if (_confirmarSenhaController.text.isEmpty) {
       return 'Repita sua senha.';
     }
 
     if (_senhaController.text != _confirmarSenhaController.text) {
-      return 'As senhas n\u00e3o s\u00e3o iguais.';
+      return 'As senhas nÃ£o sÃ£o iguais.';
     }
 
     return null;
@@ -73,7 +86,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
     super.dispose();
   }
 
-  void _criarConta() {
+  Future<void> _criarConta() async {
     setState(() {
       _nomeAlterado = true;
       _emailAlterado = true;
@@ -81,24 +94,38 @@ class _TelaCadastroState extends State<TelaCadastro> {
       _confirmacaoAlterada = true;
     });
 
-    if (!_formularioValido) {
+    if (!_formularioValido || _carregando) {
       return;
     }
 
-    final erro = AuthService.cadastrar(
+    setState(() => _carregando = true);
+
+    final erro = await AuthService.cadastrar(
       nome: _nomeController.text,
       email: _emailController.text,
       senha: _senhaController.text,
     );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _carregando = false);
 
     if (erro != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
       return;
     }
 
+    await FavoritosService.instance.carregar();
+
+    if (!mounted) {
+      return;
+    }
+
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Evena')),
+      MaterialPageRoute(builder: (_) => const MyHomePage(title: 'Evena')),
       (route) => false,
     );
   }
@@ -137,7 +164,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       ),
                     ),
                     TextSpan(
-                      text: '\u00c9 r\u00e1pido e f\u00e1cil!',
+                      text: 'Ã‰ rÃ¡pido e fÃ¡cil!',
                       style: TextStyle(
                         fontWeight: FontWeight.w300,
                         color: Colors.white70,
@@ -177,8 +204,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
               const SizedBox(height: 20),
               CampoTextoCustomizado(
                 titulo: 'Senha',
-                labelText:
-                    'M\u00edn. 8, mai\u00fascula, min\u00fascula e n\u00famero',
+                labelText: 'MÃ­n. 8, maiÃºscula, minÃºscula e nÃºmero',
                 prefixIcon: Icons.lock_outline,
                 isSenha: true,
                 controller: _senhaController,
@@ -224,7 +250,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       ),
                       TextSpan(text: ' e a '),
                       TextSpan(
-                        text: 'Pol\u00edtica de Privacidade',
+                        text: 'PolÃ­tica de Privacidade',
                         style: TextStyle(
                           color: Color(0xFF5CD825),
                           decoration: TextDecoration.underline,
@@ -247,8 +273,10 @@ class _TelaCadastroState extends State<TelaCadastro> {
               ),
               const SizedBox(height: 10),
               BotaoCustomizado(
-                texto: 'Criar Conta',
-                onPressed: _formularioValido ? _criarConta : null,
+                texto: _carregando ? 'Criando...' : 'Criar Conta',
+                onPressed: _formularioValido && !_carregando
+                    ? _criarConta
+                    : null,
               ),
               const SizedBox(height: 30),
               Center(
@@ -262,7 +290,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       fontWeight: FontWeight.w400,
                     ),
                     children: [
-                      const TextSpan(text: 'J\u00e1 tem uma conta?'),
+                      const TextSpan(text: 'JÃ¡ tem uma conta?'),
                       TextSpan(
                         text: ' Entrar',
                         style: const TextStyle(
@@ -274,7 +302,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const TelaLogin(),
+                                builder: (_) => const TelaLogin(),
                               ),
                             );
                           },

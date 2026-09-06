@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.evena">
 
-    <application
+    <application android:usesCleartextTraffic="true"
         android:label="evena"
         android:name="android.app.Application"
         android:icon="@mipmap/ic_launcher">

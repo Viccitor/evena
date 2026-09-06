@@ -14,6 +14,36 @@ class CardEvento extends StatelessWidget {
     this.compacto = false,
   });
 
+  Widget _imagem() {
+    if (evento.imagemUrl.startsWith('http://') ||
+        evento.imagemUrl.startsWith('https://')) {
+      return Image.network(
+        evento.imagemUrl,
+        width: compacto ? 104 : 126,
+        height: compacto ? 112 : 132,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallback(),
+      );
+    }
+
+    return Image.asset(
+      evento.imagemUrl,
+      width: compacto ? 104 : 126,
+      height: compacto ? 112 : 132,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _fallback(),
+    );
+  }
+
+  Widget _fallback() {
+    return Container(
+      width: compacto ? 104 : 126,
+      height: compacto ? 112 : 132,
+      color: const Color(0xFF251660),
+      child: const Icon(Icons.event_rounded, color: Colors.white38, size: 36),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoritos = FavoritosService.instance;
@@ -38,12 +68,7 @@ class CardEvento extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(14),
-                        child: Image.asset(
-                          evento.imagemUrl,
-                          width: compacto ? 104 : 126,
-                          height: compacto ? 112 : 132,
-                          fit: BoxFit.cover,
-                        ),
+                        child: _imagem(),
                       ),
                       Positioned(
                         top: 7,
@@ -55,7 +80,21 @@ class CardEvento extends StatelessWidget {
                             tooltip: favoritado
                                 ? 'Remover dos favoritos'
                                 : 'Adicionar aos favoritos',
-                            onPressed: () => favoritos.alternar(evento.id),
+                            onPressed: () async {
+                              final sucesso = await favoritos.alternar(
+                                evento.id,
+                              );
+
+                              if (!sucesso && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Não foi possível atualizar os favoritos.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                             icon: Icon(
                               favoritado
                                   ? Icons.favorite
@@ -144,6 +183,7 @@ class CardEvento extends StatelessWidget {
 
 class _DataBadge extends StatelessWidget {
   final Evento evento;
+
   const _DataBadge({required this.evento});
 
   @override
@@ -163,8 +203,8 @@ class _DataBadge extends StatelessWidget {
             evento.dia,
             style: const TextStyle(
               color: Color(0xFF9E5BFF),
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
               height: 1,
             ),
           ),
@@ -172,9 +212,9 @@ class _DataBadge extends StatelessWidget {
           Text(
             evento.mes,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 9,
+              color: Colors.white54,
               fontWeight: FontWeight.w700,
+              fontSize: 9,
             ),
           ),
         ],
@@ -200,7 +240,7 @@ class _InfoLinha extends StatelessWidget {
             texto,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white70, fontSize: 13.5),
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
           ),
         ),
       ],

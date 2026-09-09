@@ -183,6 +183,7 @@ class CardEvento extends StatelessWidget {
 
 class _DataBadge extends StatelessWidget {
   final Evento evento;
+
   const _DataBadge({required this.evento});
 
   @override
@@ -202,8 +203,8 @@ class _DataBadge extends StatelessWidget {
             evento.dia,
             style: const TextStyle(
               color: Color(0xFF9E5BFF),
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
               height: 1,
             ),
           ),
@@ -211,9 +212,9 @@ class _DataBadge extends StatelessWidget {
           Text(
             evento.mes,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 9,
+              color: Colors.white54,
               fontWeight: FontWeight.w700,
+              fontSize: 9,
             ),
           ),
         ],
@@ -239,7 +240,7 @@ class _InfoLinha extends StatelessWidget {
             texto,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white70, fontSize: 13.5),
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
           ),
         ),
       ],

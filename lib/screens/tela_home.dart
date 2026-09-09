@@ -10,6 +10,9 @@ import 'package:evena/screens/tela_inicio.dart';
 import 'package:evena/screens/tela_pesquisa.dart';
 import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
+import 'package:evena/services/usuario_service.dart';
+import 'package:evena/services/auth_service.dart';
+import 'package:evena/screens/tela_login.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -258,91 +261,123 @@ class _TelaHomeState extends State<TelaHome> {
     return Drawer(
       backgroundColor: const Color(0xFF100B2A),
       child: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column( // 1. Usamos Column para poder controlar o topo e o fundo
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
-              child: SizedBox(
-                height: 120,
-                width: double.infinity,
-                child: ClipRect(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    alignment: Alignment.centerLeft,
-                    child: Image.asset(
-                      'assets/images/logo_evena_s_fundo.png',
+            // --- TOPO E NAVEGAÇÃO SUPERIOR ---
+            Expanded( // 2. O Expanded força esta lista a ocupar o espaço livre no meio
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+                    child: SizedBox(
+                      height: 120,
+                      width: double.infinity,
+                      child: ClipRect(
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          alignment: Alignment.centerLeft,
+                          child: Image.asset(
+                            'assets/images/logo_evena_s_fundo.png',
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  ListTile(
+                    selected: _indiceAtual == 0,
+                    selectedTileColor: const Color(0xFF1F1843),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    leading: Icon(
+                      _indiceAtual == 0 ? Icons.home_rounded : Icons.home_outlined,
+                      color: _indiceAtual == 0
+                          ? const Color(0xFF63D13E)
+                          : Colors.white60,
+                    ),
+                    title: Text(
+                      'Início',
+                      style: TextStyle(
+                        color: _indiceAtual == 0 ? Colors.white : Colors.white70,
+                        fontWeight: _indiceAtual == 0 ? FontWeight.w700 : FontWeight.w400,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _mudarAba(0);
+                    },
+                  ),
+                  ListTile(
+                    selected: _indiceAtual == 1,
+                    selectedTileColor: const Color(0xFF1F1843),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    leading: Icon(
+                      _indiceAtual == 1
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color: _indiceAtual == 1
+                          ? const Color(0xFF63D13E)
+                          : Colors.white60,
+                    ),
+                    title: Text(
+                      'Favoritos',
+                      style: TextStyle(
+                        color: _indiceAtual == 1 ? Colors.white : Colors.white70,
+                        fontWeight: _indiceAtual == 1 ? FontWeight.w700 : FontWeight.w400,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _mudarAba(1);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.person_add_alt_1_rounded,
+                      color: Colors.white60,
+                    ),
+                    title: const Text(
+                      'Cadastro / Login',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const TelaInicio()),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
-            ListTile(
-              selected: _indiceAtual == 0,
-              selectedTileColor: const Color(0xFF1F1843),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              leading: Icon(
-                _indiceAtual == 0 ? Icons.home_rounded : Icons.home_outlined,
-                color: _indiceAtual == 0
-                    ? const Color(0xFF63D13E)
-                    : Colors.white60,
-              ),
-              title: Text(
-                'Início',
-                style: TextStyle(
-                  color: _indiceAtual == 0 ? Colors.white : Colors.white70,
-                  fontWeight: _indiceAtual == 0 ? FontWeight.w700 : FontWeight.w400,
+
+            // --- RODAPÉ (FIXO EMBAIXO) ---
+            const Divider(color: Colors.white12, height: 1), // Linha separadora sutil
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
+                title: const Text(
+                  'Sair',
+                  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
                 ),
+                onTap: () async {
+                  AuthService.sair();
+                  await UsuarioService.instance.deslogar();
+
+                  if (!context.mounted) return;
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TelaLogin()),
+                        (route) => false,
+                  );
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                _mudarAba(0);
-              },
-            ),
-            ListTile(
-              selected: _indiceAtual == 1,
-              selectedTileColor: const Color(0xFF1F1843),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              leading: Icon(
-                _indiceAtual == 1
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
-                color: _indiceAtual == 1
-                    ? const Color(0xFF63D13E)
-                    : Colors.white60,
-              ),
-              title: Text(
-                'Favoritos',
-                style: TextStyle(
-                  color: _indiceAtual == 1 ? Colors.white : Colors.white70,
-                  fontWeight: _indiceAtual == 1 ? FontWeight.w700 : FontWeight.w400,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _mudarAba(1);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.person_add_alt_1_rounded,
-                color: Colors.white60,
-              ),
-              title: const Text(
-                'Cadastro / Login',
-                style: TextStyle(color: Colors.white70),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const TelaInicio()),
-                );
-              },
             ),
           ],
         ),

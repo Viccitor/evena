@@ -1,8 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:evena/components/card_evento.dart';
-import 'package:evena/data/eventos_data.dart';
 import 'package:evena/models/evento.dart';
 import 'package:evena/screens/tela_detalhe_evento.dart';
-import 'package:flutter/material.dart';
+import 'package:evena/services/evento_service.dart';
 
 class TelaPesquisa extends StatefulWidget {
   const TelaPesquisa({super.key});
@@ -13,32 +13,30 @@ class TelaPesquisa extends StatefulWidget {
 
 class _TelaPesquisaState extends State<TelaPesquisa> {
   final _controller = TextEditingController();
-  String _termo = '';
+  final _service = EventoService.instance;
 
-  List<Evento> get _resultados {
-    final termo = _normalizar(_termo.trim());
-    if (termo.isEmpty) return eventos;
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onRebuild);
+    _service.addListener(_onRebuild);
 
-    return eventos.where((evento) {
-      final alvo = _normalizar(
-        '${evento.titulo} ${evento.categoria} ${evento.local} ${evento.endereco} ${evento.formato}',
-      );
-      return alvo.contains(termo);
-    }).toList();
+    // Carrega os eventos da API se a lista estiver vazia
+    if (_service.eventos.isEmpty) {
+      _service.carregar();
+    }
   }
 
-  String _normalizar(String texto) {
-    const comAcento = 'áàãâäéèêëíìîïóòõôöúùûüç';
-    const semAcento = 'aaaaaeeeeiiiiooooouuuuc';
-    var valor = texto.toLowerCase();
-    for (var i = 0; i < comAcento.length; i++) {
-      valor = valor.replaceAll(comAcento[i], semAcento[i]);
+  void _onRebuild() {
+    if (mounted) {
+      setState(() {});
     }
-    return valor;
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onRebuild);
+    _service.removeListener(_onRebuild);
     _controller.dispose();
     super.dispose();
   }
@@ -52,7 +50,8 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
 
   @override
   Widget build(BuildContext context) {
-    final resultados = _resultados;
+    final termo = _controller.text;
+    final resultados = _service.pesquisar(termo);
 
     return Scaffold(
       backgroundColor: const Color(0xFF080427),
@@ -72,7 +71,6 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
               child: TextField(
                 controller: _controller,
                 autofocus: true,
-                onChanged: (valor) => setState(() => _termo = valor),
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Nome, categoria ou local...',
@@ -81,14 +79,14 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
                     Icons.search,
                     color: Color(0xFF63D13E),
                   ),
-                  suffixIcon: _termo.isNotEmpty
+                  suffixIcon: termo.isNotEmpty
                       ? IconButton(
-                          onPressed: () {
-                            _controller.clear();
-                            setState(() => _termo = '');
-                          },
-                          icon: const Icon(Icons.close, color: Colors.white54),
-                        )
+                    onPressed: () => _controller.clear(),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white54,
+                    ),
+                  )
                       : null,
                   filled: true,
                   fillColor: const Color(0xFF140E32),
@@ -109,8 +107,8 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
               child: Row(
                 children: [
                   Text(
-                    _termo.isEmpty
-                        ? 'Todos os eventos'
+                    termo.isEmpty
+                        ? 'Todos os eventos (${resultados.length})'
                         : '${resultados.length} resultado(s)',
                     style: const TextStyle(
                       color: Colors.white70,
@@ -123,21 +121,30 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: resultados.isEmpty
+              child: _service.carregando && _service.eventos.isEmpty
+                  ? const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF63D13E),
+                ),
+              )
+                  : resultados.isEmpty
                   ? const _EstadoVazio()
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
-                      itemCount: resultados.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final evento = resultados[index];
-                        return CardEvento(
-                          evento: evento,
-                          compacto: true,
-                          onTap: () => _abrirEvento(evento),
-                        );
-                      },
+                  : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
+                itemCount: resultados.length,
+                itemBuilder: (context, index) {
+                  final evento = resultados[index];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CardEvento(
+                      evento: evento,
+                      compacto: true,
+                      onTap: () => _abrirEvento(evento),
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -151,12 +158,12 @@ class _EstadoVazio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Icon(Icons.search_off_rounded, size: 56, color: Colors.white30),
             SizedBox(height: 14),
             Text(

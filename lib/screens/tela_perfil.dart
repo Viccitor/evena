@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:evena/services/usuario_service.dart';
 
 class PerfilTab extends StatelessWidget {
   const PerfilTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -27,6 +29,21 @@ class PerfilTab extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+        
+        ListenableBuilder(
+          listenable: UsuarioService.instance,
+          builder: (context, _) {
+            final usuario = UsuarioService.instance.usuario;
+
+            return Text(
+              usuario?.nome ?? 'Tu não ta logado',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            );
+          },
+      ),
+
+
+
           SizedBox(height: 5),
           Text(
             'Área pronta para evoluir depois.',

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:evena/screens/tela_home.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:evena/services/usuario_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UsuarioService.instance.carregarSessaoSalva();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();

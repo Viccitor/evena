@@ -19,12 +19,11 @@ class TelaDetalheEvento extends StatelessWidget {
       'api': '1',
       'query': evento.endereco,
     });
+
     await _abrirUrl(context, uri, 'Não foi possível abrir o Google Maps.');
   }
 
   Future<void> _abrirGoogleCalendar(BuildContext context) async {
-    // Mesma lógica do site:
-    // https://calendar.google.com/calendar/render?action=TEMPLATE&text=${n}&dates=${o}/${i}&details=${t}&location=${r}
     final uri = Uri.https('calendar.google.com', '/calendar/render', {
       'action': 'TEMPLATE',
       'text': evento.titulo,
@@ -32,14 +31,50 @@ class TelaDetalheEvento extends StatelessWidget {
       'details': evento.descricao,
       'location': '${evento.local} - ${evento.endereco}',
     });
-    await _abrirUrl(context, uri, 'Não foi possível abrir o Google Calendar.');
+
+    await _abrirUrl(
+      context,
+      uri,
+      'Não foi possível abrir o Google Calendar.',
+    );
   }
 
   Future<void> _abrirUrl(BuildContext context, Uri uri, String erro) async {
     final abriu = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
     if (!abriu && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
     }
+  }
+
+  Widget _imagem() {
+    if (evento.imagemUrl.startsWith('http://') ||
+        evento.imagemUrl.startsWith('https://')) {
+      return Image.network(
+        evento.imagemUrl,
+        width: double.infinity,
+        height: 235,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallbackImagem(),
+      );
+    }
+
+    return Image.asset(
+      evento.imagemUrl,
+      width: double.infinity,
+      height: 235,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _fallbackImagem(),
+    );
+  }
+
+  Widget _fallbackImagem() {
+    return Container(
+      width: double.infinity,
+      height: 235,
+      color: const Color(0xFF251660),
+      child: const Icon(Icons.event_rounded, color: Colors.white38, size: 58),
+    );
   }
 
   @override
@@ -58,9 +93,22 @@ class TelaDetalheEvento extends StatelessWidget {
             animation: favoritos,
             builder: (context, _) {
               final favoritado = favoritos.contem(evento.id);
+
               return IconButton(
                 tooltip: favoritado ? 'Remover dos favoritos' : 'Favoritar',
-                onPressed: () => favoritos.alternar(evento.id),
+                onPressed: () async {
+                  final sucesso = await favoritos.alternar(evento.id);
+
+                  if (!sucesso && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Não foi possível atualizar os favoritos.',
+                        ),
+                      ),
+                    );
+                  }
+                },
                 icon: Icon(
                   favoritado ? Icons.favorite : Icons.favorite_border_rounded,
                   color: favoritado ? const Color(0xFF63D13E) : Colors.white,
@@ -80,12 +128,7 @@ class TelaDetalheEvento extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: Stack(
                 children: [
-                  Image.asset(
-                    evento.imagemUrl,
-                    width: double.infinity,
-                    height: 235,
-                    fit: BoxFit.cover,
-                  ),
+                  _imagem(),
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -219,11 +262,11 @@ class TelaDetalheEvento extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: _MiniInfo(
                     icon: Icons.people_outline,
                     titulo: 'IDADE',
-                    valor: 'Livre',
+                    valor: evento.classificacao,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -300,6 +343,7 @@ class TelaDetalheEvento extends StatelessWidget {
 
 class _CardInfo extends StatelessWidget {
   final Widget child;
+
   const _CardInfo({required this.child});
 
   @override

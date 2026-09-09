@@ -1,7 +1,14 @@
+import 'package:evena/models/perfil.dart';
+import 'package:evena/services/api_service.dart';
+
 class AuthService {
   AuthService._();
 
-  static final Map<String, _UsuarioLocal> _usuarios = {};
+  static Perfil? _perfilAtual;
+
+  static Perfil? get perfilAtual => _perfilAtual;
+
+  static bool get estaLogado => _perfilAtual != null;
 
   static String normalizarEmail(String email) => email.trim().toLowerCase();
 
@@ -15,7 +22,7 @@ class AuthService {
     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
     if (!regex.hasMatch(valor)) {
-      return 'Digite um e-mail v\u00e1lido.';
+      return 'Digite um e-mail válido.';
     }
 
     return null;
@@ -27,105 +34,98 @@ class AuthService {
     }
 
     if (!RegExp(r'[A-Z]').hasMatch(senha)) {
-      return 'Adicione pelo menos uma letra mai\u00fascula.';
+      return 'Adicione pelo menos uma letra maiúscula.';
     }
 
     if (!RegExp(r'[a-z]').hasMatch(senha)) {
-      return 'Adicione pelo menos uma letra min\u00fascula.';
+      return 'Adicione pelo menos uma letra minúscula.';
     }
 
     if (!RegExp(r'[0-9]').hasMatch(senha)) {
-      return 'Adicione pelo menos um n\u00famero.';
+      return 'Adicione pelo menos um número.';
     }
 
     return null;
   }
 
   static String? validarEmailDeLogin(String email) {
-    final erro = validarEmail(email);
-    if (erro != null) {
-      return erro;
-    }
-
-    if (!_usuarios.containsKey(normalizarEmail(email))) {
-      return 'E-mail n\u00e3o cadastrado.';
-    }
-
-    return null;
+    return validarEmail(email);
   }
 
-  static String? validarSenhaDeLogin(String email, String senha) {
+  static String? validarSenhaDeLogin(String senha) {
     if (senha.isEmpty) {
       return 'Digite sua senha.';
     }
 
-    final usuario = _usuarios[normalizarEmail(email)];
-
-    if (usuario != null && usuario.senha != senha) {
-      return 'Senha incorreta.';
-    }
-
     return null;
   }
 
-  static String? cadastrar({
+  static Future<String?> cadastrar({
     required String nome,
     required String email,
     required String senha,
-  }) {
-    final nomeLimpo = nome.trim();
-    final emailNormalizado = normalizarEmail(email);
+  }) async {
+    try {
+      final data =
+      await ApiService.post(
+        '/perfis/cadastrar',
+        body: {
+          'nome': nome.trim(),
+          'email': normalizarEmail(email),
+          'senha': senha,
+        },
+      )
+      as Map<String, dynamic>;
 
-    if (nomeLimpo.isEmpty) {
-      return 'Digite seu nome.';
+      _perfilAtual = Perfil.fromJson(data);
+      return null;
+    } on ApiException catch (erro) {
+      return erro.mensagem;
+    } catch (_) {
+      return 'Não foi possível conectar com a API.';
     }
-
-    final erroEmail = validarEmail(emailNormalizado);
-    if (erroEmail != null) {
-      return erroEmail;
-    }
-
-    final erroSenha = validarSenha(senha);
-    if (erroSenha != null) {
-      return erroSenha;
-    }
-
-    if (_usuarios.containsKey(emailNormalizado)) {
-      return 'J\u00e1 existe uma conta com esse e-mail.';
-    }
-
-    _usuarios[emailNormalizado] = _UsuarioLocal(
-      nome: nomeLimpo,
-      email: emailNormalizado,
-      senha: senha,
-    );
-
-    return null;
   }
 
-  static String? entrar({required String email, required String senha}) {
-    final erroEmail = validarEmailDeLogin(email);
-    if (erroEmail != null) {
-      return erroEmail;
-    }
+  static Future<String?> entrar({
+    required String email,
+    required String senha,
+  }) async {
+    try {
+      final data =
+      await ApiService.post(
+        '/perfis/autenticar',
+        body: {'email': normalizarEmail(email), 'senha': senha},
+      )
+      as Map<String, dynamic>;
 
-    final erroSenha = validarSenhaDeLogin(email, senha);
-    if (erroSenha != null) {
-      return erroSenha;
+      _perfilAtual = Perfil.fromJson(data);
+      return null;
+    } on ApiException catch (erro) {
+      return erro.mensagem;
+    } catch (_) {
+      return 'Não foi possível conectar com a API.';
     }
-
-    return null;
   }
-}
 
-class _UsuarioLocal {
-  final String nome;
-  final String email;
-  final String senha;
+  static Future<String?> recuperarSenha({
+    required String email,
+    required String novaSenha,
+  }) async {
+    try {
+      await ApiService.post(
+        '/perfis/recuperar-senha',
+        body: {'email': normalizarEmail(email), 'novaSenha': novaSenha},
+      );
 
-  const _UsuarioLocal({
-    required this.nome,
-    required this.email,
-    required this.senha,
-  });
+      return null;
+    } on ApiException catch (erro) {
+      return erro.mensagem;
+    } catch (_) {
+      return 'Não foi possível conectar com a API.';
+    }
+  }
+
+  static void sair() {
+    _perfilAtual = null;
+  }
 }

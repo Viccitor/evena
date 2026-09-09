@@ -22,7 +22,6 @@ class _TelaHomeState extends State<TelaHome> {
   int _indiceAtual = 0;
   late final PageController _pageController;
 
-  // Estado da lista de eventos e localização
   List<Evento> _listaEventos = List.from(eventos);
   bool _carregandoLocalizacao = false;
   Position? _posicaoAtual;
@@ -31,6 +30,7 @@ class _TelaHomeState extends State<TelaHome> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _indiceAtual);
+    _ativarLocalizacaoSilenciosa();
   }
 
   @override
@@ -39,15 +39,31 @@ class _TelaHomeState extends State<TelaHome> {
     super.dispose();
   }
 
-  /// Método responsável por pedir permissão e obter a localização do usuário
-  Future<void> _ativarLocalizacao() async {
-    setState(() => _carregandoLocalizacao = true);
+  /// Tenta obter a localização sem forçar pop-up se já tiver permissão concedida
+  Future<void> _ativarLocalizacaoSilenciosa() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
 
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        _obterLocalizacaoEOrdenar();
+      }
+    } catch (_) {}
+  }
+
+  /// Solicita permissão e ordena a lista de eventos do mais próximo ao mais distante
+  Future<void> _solicitarEObterLocalizacao() async {
+    setState(() => _carregandoLocalizacao = true);
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _mostrarSnackBar('Por favor, ative o GPS do seu celular.');
-        setState(() => _carregandoLocalizacao = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ative o GPS do seu dispositivo.')),
+          );
+        }
         return;
       }
 
@@ -55,66 +71,70 @@ class _TelaHomeState extends State<TelaHome> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _mostrarSnackBar('Permissão de localização negada.');
-          setState(() => _carregandoLocalizacao = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Permissão de localização negada.')),
+            );
+          }
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _mostrarSnackBar(
-          'Permissões negadas permanentemente. Ative nas configurações do aparelho.',
-        );
-        setState(() => _carregandoLocalizacao = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permissão permanentemente negada nas configurações.'),
+            ),
+          );
+        }
         return;
       }
 
-      // Obtém a posição atual do aparelho
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
-
-      // Reordena os eventos com base na distância
-      List<Evento> eventosOrdenados = List.from(_listaEventos);
-      eventosOrdenados.sort((a, b) {
-        double distA = Geolocator.distanceBetween(
-          position.latitude,
-          position.longitude,
-          a.latitude,
-          a.longitude,
-        );
-        double distB = Geolocator.distanceBetween(
-          position.latitude,
-          position.longitude,
-          b.latitude,
-          b.longitude,
-        );
-        return distA.compareTo(distB);
-      });
-
-      setState(() {
-        _posicaoAtual = position;
-        _listaEventos = eventosOrdenados;
-        _carregandoLocalizacao = false;
-      });
-
-      _mostrarSnackBar('Eventos reordenados pela sua localização!');
+      await _obterLocalizacaoEOrdenar();
     } catch (e) {
-      _mostrarSnackBar('Erro ao obter localização: $e');
-      setState(() => _carregandoLocalizacao = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao obter localização: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _carregandoLocalizacao = false);
+      }
     }
   }
 
-  void _mostrarSnackBar(String mensagem) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: const Color(0xFF181236),
+  Future<void> _obterLocalizacaoEOrdenar() async {
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
       ),
     );
+
+    List<Evento> eventosOrdenados = List.from(_listaEventos);
+    eventosOrdenados.sort((a, b) {
+      double distA = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        a.latitude,
+        a.longitude,
+      );
+      double distB = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        b.latitude,
+        b.longitude,
+      );
+      return distA.compareTo(distB);
+    });
+
+    if (mounted) {
+      setState(() {
+        _posicaoAtual = position;
+        _listaEventos = eventosOrdenados;
+      });
+    }
   }
 
   void _abrirEvento(Evento evento) {
@@ -144,11 +164,10 @@ class _TelaHomeState extends State<TelaHome> {
     final paginas = [
       _InicioTab(
         onAbrirEvento: _abrirEvento,
-        onPesquisar: _abrirPesquisa,
-        onAtivarLocalizacao: _ativarLocalizacao,
-        carregandoLocalizacao: _carregandoLocalizacao,
-        posicaoAtiva: _posicaoAtual != null,
         eventos: _listaEventos,
+        posicaoAtual: _posicaoAtual,
+        carregandoLocalizacao: _carregandoLocalizacao,
+        onSolicitarLocalizacao: _solicitarEObterLocalizacao,
       ),
       FavoritosTab(onAbrirEvento: _abrirEvento),
       const PerfilTab(),
@@ -334,19 +353,17 @@ class _TelaHomeState extends State<TelaHome> {
 
 class _InicioTab extends StatelessWidget {
   final ValueChanged<Evento> onAbrirEvento;
-  final VoidCallback onPesquisar;
-  final VoidCallback onAtivarLocalizacao;
-  final bool carregandoLocalizacao;
-  final bool posicaoAtiva;
   final List<Evento> eventos;
+  final Position? posicaoAtual;
+  final bool carregandoLocalizacao;
+  final VoidCallback onSolicitarLocalizacao;
 
   const _InicioTab({
     required this.onAbrirEvento,
-    required this.onPesquisar,
-    required this.onAtivarLocalizacao,
-    required this.carregandoLocalizacao,
-    required this.posicaoAtiva,
     required this.eventos,
+    required this.posicaoAtual,
+    required this.carregandoLocalizacao,
+    required this.onSolicitarLocalizacao,
   });
 
   @override
@@ -379,8 +396,7 @@ class _InicioTab extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text:
-                  'Ative sua localização e descubra eventos incríveis perto de você!',
+                  text: 'Descubra experiências incríveis perto de você!',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 15,
@@ -390,81 +406,58 @@ class _InicioTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 18),
 
-          // Botão de Ativar Localização com Feedback de Carregamento
-          SizedBox(
-            width: 280,
-            child: Material(
-              color: const Color(0xFF63D13E),
-              borderRadius: BorderRadius.circular(13),
-              child: InkWell(
-                onTap: carregandoLocalizacao ? null : onAtivarLocalizacao,
-                borderRadius: BorderRadius.circular(13),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: carregandoLocalizacao
-                      ? const Center(
-                    child: SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.black,
-                        strokeWidth: 2.5,
-                      ),
+          // --- BOTÃO DE LOCALIZAÇÃO (GPS) RESTAURADO ---
+          InkWell(
+            onTap: carregandoLocalizacao ? null : onSolicitarLocalizacao,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF140E32),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF7C2BDC).withValues(alpha: .35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  carregandoLocalizacao
+                      ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF63D13E),
                     ),
                   )
-                      : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        posicaoAtiva
-                            ? Icons.check_circle_rounded
-                            : Icons.near_me_rounded,
-                        color: Colors.black,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              posicaoAtiva
-                                  ? 'Localização Ativa'
-                                  : 'Ativar Localização',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              posicaoAtiva
-                                  ? 'Eventos ordenados por proximidade'
-                                  : 'Para ver eventos perto de você',
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: Colors.black,
-                        size: 20,
-                      ),
-                    ],
+                      : Icon(
+                    posicaoAtual != null
+                        ? Icons.my_location_rounded
+                        : Icons.location_on_rounded,
+                    color: const Color(0xFF63D13E),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      posicaoAtual != null
+                          ? 'Eventos ordenados por proximidade'
+                          : 'Usar minha localização para ver eventos próximos',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (posicaoAtual == null && !carregandoLocalizacao)
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white54,
+                      size: 14,
+                    ),
+                ],
               ),
             ),
           ),
@@ -532,7 +525,9 @@ class _InicioTab extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 28),
+
+          const SizedBox(height: 20),
+
           const Text(
             'Próximos eventos',
             style: TextStyle(
@@ -543,24 +538,31 @@ class _InicioTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          ...eventos
-              .skip(1)
-              .map(
-                (evento) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: CardEvento(
-                evento: evento,
-                compacto: true,
-                onTap: () => onAbrirEvento(evento),
-              ),
+          // Se só houver 1 ou nenhum evento, não tenta pular o primeiro
+          if (eventos.length > 1)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: eventos.length - 1,
+              itemBuilder: (context, index) {
+                // index + 1 para pular o primeiro evento que já está em destaque
+                final evento = eventos[index + 1];
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: CardEvento(
+                    evento: evento,
+                    compacto: true,
+                    onTap: () => onAbrirEvento(evento),
+                  ),
+                );
+              },
             ),
-          ),
         ],
       ),
     );
   }
 }
-
 class _TituloSecao extends StatelessWidget {
   final String titulo;
   final int quantidade;

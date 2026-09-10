@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:evena/services/usuario_service.dart';
+import 'package:evena/screens/tela_login.dart';
 
 class PerfilTab extends StatelessWidget {
   const PerfilTab({super.key});
@@ -34,11 +35,52 @@ class PerfilTab extends StatelessWidget {
           listenable: UsuarioService.instance,
           builder: (context, _) {
             final usuario = UsuarioService.instance.usuario;
+            final estaLogado = UsuarioService.instance.estaLogado;
 
-            return Text(
-              usuario?.nome ?? 'Tu não ta logado',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            );
+            if(estaLogado){
+
+              return Text(
+                usuario?.nome ?? 'Algo deu errado',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              );
+
+            }else{
+
+              return Column(
+                children: [
+
+                  const Text(
+                    'Parece que você ainda não está logado',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                  ),
+                ),
+
+                  const SizedBox(height: 10),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF63D13E),
+                      foregroundColor: Colors.black,
+                    ),
+
+                    child: const Text('Fazer Login'),
+
+                    onPressed: (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TelaLogin()),
+                      );
+                    },
+
+                  ),
+
+                  ],
+                );
+            }
+
           },
       ),
 

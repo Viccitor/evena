@@ -12,7 +12,6 @@ import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
 import 'package:evena/services/usuario_service.dart';
 import 'package:evena/services/auth_service.dart';
-import 'package:evena/screens/tela_login.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -373,7 +372,7 @@ class _TelaHomeState extends State<TelaHome> {
 
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => const TelaLogin()),
+                    MaterialPageRoute(builder: (_) => const TelaHome()),
                         (route) => false,
                   );
                 },

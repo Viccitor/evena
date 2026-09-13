@@ -37,10 +37,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF63D13E),
+          seedColor: const Color(0xFF00000D),
           brightness: Brightness.dark,
         ),
-        scaffoldBackgroundColor: const Color(0xFF080427),
+        scaffoldBackgroundColor: const Color(0xFF00000D),
         textTheme: GoogleFonts.latoTextTheme(
           ThemeData.dark().textTheme,
         ),

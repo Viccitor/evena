@@ -176,7 +176,7 @@ class _TelaHomeState extends State<TelaHome> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080427),
+      backgroundColor: const Color(0xFF00000C),
       drawer: _buildDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF01011D),

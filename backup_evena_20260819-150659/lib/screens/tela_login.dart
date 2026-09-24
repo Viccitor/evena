@@ -1,37 +1,16 @@
 import 'package:evena/components/botao_customizado.dart';
 import 'package:evena/components/campo_texto_customizado.dart';
-import 'package:evena/main.dart';
+import 'package:evena/screens/tela_home.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-import 'tela_esqueceu_senha.dart';
+import 'package:evena/screens/tela_esqueceu_senha.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
 
   @override
   State<TelaLogin> createState() => _TelaLoginState();
-}
-
-Widget _buildBotaoSocial({
-  required String caminhoImagem,
-  required VoidCallback onTap,
-}) {
-  return InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(16.0),
-    child: Container(
-      width: 60,
-      height: 60,
-      padding: const EdgeInsets.all(6.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: Colors.white12, width: 1),
-      ),
-      child: Image.asset(caminhoImagem, fit: BoxFit.contain),
-    ),
-  );
 }
 
 class _TelaLoginState extends State<TelaLogin> {
@@ -49,11 +28,7 @@ class _TelaLoginState extends State<TelaLogin> {
   String? get _erroSenha {
     if (!_senhaAlterada) return null;
 
-    final erroEmail = AuthService.validarEmailDeLogin(_emailController.text);
-    if (erroEmail != null) return null;
-
     return AuthService.validarSenhaDeLogin(
-      _emailController.text,
       _senhaController.text,
     );
   }
@@ -65,13 +40,13 @@ class _TelaLoginState extends State<TelaLogin> {
     super.dispose();
   }
 
-  void _entrar() {
+  void _entrar() async {
     setState(() {
       _emailAlterado = true;
       _senhaAlterada = true;
     });
 
-    final erro = AuthService.entrar(
+    final erro = await AuthService.entrar(
       email: _emailController.text,
       senha: _senhaController.text,
     );
@@ -80,10 +55,33 @@ class _TelaLoginState extends State<TelaLogin> {
       return;
     }
 
+    if (!mounted) return;
+
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Evena')),
-      (route) => false,
+      MaterialPageRoute(builder: (context) => const TelaHome()),
+          (route) => false,
+    );
+  }
+
+  Widget _buildBotaoSocial({
+    required String caminhoImagem,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.0),
+      child: Container(
+        width: 60,
+        height: 60,
+        padding: const EdgeInsets.all(6.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E2C),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: Colors.white12, width: 1),
+        ),
+        child: Image.asset(caminhoImagem, fit: BoxFit.contain),
+      ),
     );
   }
 
@@ -132,7 +130,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         style: TextStyle(color: Color(0xFF5CD825)),
                       ),
                       TextSpan(
-                        text: 'Fa\u00e7a login para continuar',
+                        text: 'Faça login para continuar',
                         style: TextStyle(
                           fontWeight: FontWeight.w300,
                           color: Colors.white70,

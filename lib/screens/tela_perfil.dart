@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:evena/services/usuario_service.dart';
 import 'package:evena/screens/tela_login.dart';
+import 'package:evena/components/card_secao.dart';
+import 'package:evena/components/perfil_favoritos.dart';
+import 'package:evena/services/favoritos_service.dart';
+import 'package:evena/data/eventos_data.dart';
+import 'package:evena/screens/tela_detalhe_evento.dart';
 
 class PerfilTab extends StatelessWidget {
   const PerfilTab({super.key});
@@ -174,20 +179,55 @@ class PerfilTab extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                Container( //container das conquistas
-                  width: double.infinity,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2F165C),
-                    borderRadius: BorderRadius.circular(10),
+                // --- AQUI ENTRA A SEÇÃO DE EVENTOS FAVORITADOS DINÂMICA ---
+                AnimatedBuilder(
+                  animation: FavoritosService.instance,
+                  builder: (context, _) {
+                    final favoritos = FavoritosService.instance;
+                    final listaFavoritos = eventos
+                        .where((e) => favoritos.contem(e.id))
+                        .toList();
 
-                    border: Border.all(
-                      color: const Color(0xFF593BA2),
-                      width: 1,
-                    ),
-                  ),
-
+                    return CardSecao(
+                      titulo: 'Eventos favoritados',
+                      icone: Icons.favorite,
+                      conteudo: listaFavoritos.isEmpty
+                          ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text(
+                          'Nenhum evento favoritado ainda.',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                          : SizedBox(
+                        height: 180,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: listaFavoritos.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final eventoItem = listaFavoritos[index];
+                            return PerfilFavoritos(
+                              evento: eventoItem,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TelaDetalheEvento(evento: eventoItem),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
+
               ],
             ),
           );

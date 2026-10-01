@@ -190,7 +190,7 @@ class PerfilTab extends StatelessWidget {
 
                     return CardSecao(
                       titulo: 'Eventos favoritados',
-                      icone: Icons.favorite,
+                      icone: Icons.favorite_outline,
                       conteudo: listaFavoritos.isEmpty
                           ? const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -207,7 +207,7 @@ class PerfilTab extends StatelessWidget {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: listaFavoritos.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          separatorBuilder: (_, _) => const SizedBox(width: 14),
                           itemBuilder: (context, index) {
                             final eventoItem = listaFavoritos[index];
                             return PerfilFavoritos(

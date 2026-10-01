@@ -38,7 +38,7 @@ class PerfilFavoritos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 140,
+      width: 160,
       height: 180,
       decoration: BoxDecoration(
         color: Colors.transparent, // Fundo transparente

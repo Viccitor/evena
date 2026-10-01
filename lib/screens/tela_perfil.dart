@@ -6,13 +6,13 @@ import 'package:evena/components/perfil_favoritos.dart';
 import 'package:evena/services/favoritos_service.dart';
 import 'package:evena/data/eventos_data.dart';
 import 'package:evena/screens/tela_detalhe_evento.dart';
+import 'package:evena/components/perfil_conquistas.dart';
 
 class PerfilTab extends StatelessWidget {
   const PerfilTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return ListenableBuilder(
       listenable: UsuarioService.instance,
       builder: (context, _) {
@@ -26,48 +26,38 @@ class PerfilTab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-
-                Container( //container do banner
+                Container( // container do banner
                   width: double.infinity,
                   height: 160,
                   decoration: BoxDecoration(
                     color: const Color(0xFF2F165C),
                     borderRadius: BorderRadius.circular(16),
-
                     border: Border.all(
                       color: const Color(0xFF191628),
                       width: 1,
                     ),
                   ),
-
-                  child: ClipRRect( //BANNER DE PERFIL
+                  child: ClipRRect( // BANNER DE PERFIL
                     borderRadius: BorderRadius.circular(15),
                     child: Stack(
                       children: [
-
                         Image.network(
                           'https://i.redd.it/fnaf-1-security-room-diorama-v0-6o8hjrmyp98c1.jpg?width=736&format=pjpg&auto=webp&s=36f683fb468601ce0d7f020f9949a3b84accabcb',
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
                         ),
-
                         Container(
                           color: Colors.black.withValues(alpha: 0.3),
                         ),
-
                         Positioned(
                           top: 10,
                           right: 10,
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {
-
-                              },
-
+                              onTap: () {},
                               borderRadius: BorderRadius.circular(20),
-
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
@@ -78,7 +68,6 @@ class PerfilTab extends StatelessWidget {
                                     width: 1,
                                   ),
                                 ),
-
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -87,7 +76,6 @@ class PerfilTab extends StatelessWidget {
                                       color: Color(0xFF5CD825),
                                       size: 14,
                                     ),
-
                                     SizedBox(width: 4),
                                     Text(
                                       'Alterar banner',
@@ -103,7 +91,6 @@ class PerfilTab extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.all(12),
                           child: Align(
@@ -112,25 +99,21 @@ class PerfilTab extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
-                                Container( //container da foto de perfil
+                                Container( // container da foto de perfil
                                   width: 70,
                                   height: 70,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF2F165C),
                                     borderRadius: BorderRadius.circular(100),
-
                                     border: Border.all(
                                       color: const Color(0xFF5CD825),
                                       width: 1,
                                     ),
                                   ),
-
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(100),
                                     child: Stack(
                                       children: [
-
                                         Image.network(
                                           'https://cdn.britannica.com/52/243652-050-FEE0A5E4/Actor-Adam-Sandler-2019.jpg',
                                           width: double.infinity,
@@ -139,47 +122,37 @@ class PerfilTab extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-
                                   ),
                                 ),
-
-                                SizedBox(height: 10),
-
-                                Text(
+                                const SizedBox(height: 10),
+                                const Text(
                                   'Victor',
-
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-
                                 Text(
                                   usuario?.nome != null ? '@${usuario!.nome}' : 'Algo deu errado',
-
                                   style: const TextStyle(
                                     color: Colors.purple,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-
                               ],
                             ),
-
                           ),
                         ),
-
                       ],
                     ),
                   ),
-
                 ),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                // --- AQUI ENTRA A SEÇÃO DE EVENTOS FAVORITADOS DINÂMICA ---
+                // --- SEÇÃO DE EVENTOS FAVORITADOS DINÂMICA ---
                 AnimatedBuilder(
                   animation: FavoritosService.instance,
                   builder: (context, _) {
@@ -228,12 +201,59 @@ class PerfilTab extends StatelessWidget {
                   },
                 ),
 
+                const SizedBox(height: 20),
+
+// --- SEÇÃO DE SUAS CONQUISTAS ---
+                CardSecao(
+                  titulo: 'Suas conquistas',
+                  icone: Icons.emoji_events_outlined,
+                  conteudo: SizedBox(
+                    height: 80, // Altura exata do seu PerfilConquistas
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 3, // Quantidade de conquistas que você quer exibir
+                      separatorBuilder: (_, _) => const SizedBox(width: 12), // Espaço entre os cards
+                      itemBuilder: (context, index) {
+                        // Exemplo de lista de conquistas
+                        final conquistas = [
+                          {
+                            'titulo': 'Pioneiro',
+                            'descricao': '1º evento garantido',
+                            'icone': Icons.emoji_events,
+                            'cor': const Color(0xFF63D13E),
+                          },
+                          {
+                            'titulo': 'Festeiro',
+                            'descricao': 'Presença em 5 eventos',
+                            'icone': Icons.local_fire_department,
+                            'cor': const Color(0xFFFF9800),
+                          },
+                          {
+                            'titulo': 'Explorador',
+                            'descricao': 'Salvou 10 eventos',
+                            'icone': Icons.explore,
+                            'cor': const Color(0xFF2196F3),
+                          },
+                        ];
+
+                        final item = conquistas[index];
+
+                        return PerfilConquistas(
+                          titulo: item['titulo'] as String,
+                          descricao: item['descricao'] as String,
+                          icone: item['icone'] as IconData,
+                          corIcone: item['cor'] as Color,
+                        );
+                      },
+                    ),
+                  ),
+                )
+
               ],
             ),
           );
 
         } else {
-
           return SizedBox(
             height: MediaQuery.of(context).size.height * 0.7,
             child: Center(
@@ -249,32 +269,25 @@ class PerfilTab extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF63D13E),
                       foregroundColor: Colors.black,
                     ),
-
                     child: const Text('Fazer Login'),
-
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const TelaLogin()),
                       );
                     },
-
                   ),
-
                 ],
               ),
             ),
           );
         }
-
       },
     );
   }

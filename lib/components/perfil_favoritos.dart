@@ -44,7 +44,7 @@ class PerfilFavoritos extends StatelessWidget {
         color: Colors.transparent, // Fundo transparente
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFF593BA2), // Borda restaurada!
+          color: const Color(0xFF593BA2),
           width: 1,
         ),
       ),

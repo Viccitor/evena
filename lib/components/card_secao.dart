@@ -4,12 +4,18 @@ class CardSecao extends StatelessWidget {
   final String titulo;
   final IconData icone;
   final Widget conteudo;
+  final bool expansivel;
+  final bool expandido;
+  final VoidCallback? onToggle;
 
   const CardSecao({
     super.key,
     required this.titulo,
     required this.icone,
     required this.conteudo,
+    this.expansivel = false,
+    this.expandido = false,
+    this.onToggle,
   });
 
   @override
@@ -28,20 +34,38 @@ class CardSecao extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icone, color: const Color(0xFF8540C6), size: 16),
-              const SizedBox(width: 8),
-              Text(
-                titulo,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
+          // Cabeçalho
+          InkWell(
+            onTap: expansivel ? onToggle : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icone, color: const Color(0xFF8540C6), size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      titulo,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                if (expansivel)
+                  Icon(
+                    expandido
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: const Color(0xFF8540C6),
+                    size: 20,
+                  ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 12),

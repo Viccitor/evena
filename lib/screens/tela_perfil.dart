@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:evena/services/usuario_service.dart';
 import 'package:evena/screens/tela_login.dart';
 import 'package:evena/components/card_secao.dart';
@@ -7,9 +9,58 @@ import 'package:evena/services/favoritos_service.dart';
 import 'package:evena/data/eventos_data.dart';
 import 'package:evena/screens/tela_detalhe_evento.dart';
 import 'package:evena/components/perfil_conquistas.dart';
+import 'package:evena/components/card_historico_evento.dart';
 
-class PerfilTab extends StatelessWidget {
+class PerfilTab extends StatefulWidget {
   const PerfilTab({super.key});
+
+  @override
+  State<PerfilTab> createState() => _PerfilTabState();
+}
+
+class _PerfilTabState extends State<PerfilTab> {
+  bool _historicoExpandido = false;
+
+  // Imagens locais selecionadas do dispositivo
+  File? _bannerFile;
+  File? _perfilFile; // <--- Arquivo para a foto de perfil
+
+  // URLs padrão de fallback
+  final String _bannerUrlPadrao =
+      'https://i.redd.it/fnaf-1-security-room-diorama-v0-6o8hjrmyp98c1.jpg?width=736&format=pjpg&auto=webp&s=36f683fb468601ce0d7f020f9949a3b84accabcb';
+
+  final String _perfilUrlPadrao =
+      'https://cdn.britannica.com/52/243652-050-FEE0A5E4/Actor-Adam-Sandler-2019.jpg';
+
+  // Função para alterar o banner
+  Future<void> _alterarBanner() async {
+    final picker = ImagePicker();
+    final XFile? imagemSelecionada = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (imagemSelecionada != null) {
+      setState(() {
+        _bannerFile = File(imagemSelecionada.path);
+      });
+    }
+  }
+
+  // Função para alterar a foto de perfil
+  Future<void> _alterarFotoPerfil() async {
+    final picker = ImagePicker();
+    final XFile? imagemSelecionada = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (imagemSelecionada != null) {
+      setState(() {
+        _perfilFile = File(imagemSelecionada.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +77,8 @@ class PerfilTab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container( // container do banner
+                // --- BANNER DE PERFIL ---
+                Container(
                   width: double.infinity,
                   height: 160,
                   decoration: BoxDecoration(
@@ -37,12 +89,19 @@ class PerfilTab extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: ClipRRect( // BANNER DE PERFIL
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Stack(
                       children: [
-                        Image.network(
-                          'https://i.redd.it/fnaf-1-security-room-diorama-v0-6o8hjrmyp98c1.jpg?width=736&format=pjpg&auto=webp&s=36f683fb468601ce0d7f020f9949a3b84accabcb',
+                        _bannerFile != null
+                            ? Image.file(
+                          _bannerFile!,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                            : Image.network(
+                          _bannerUrlPadrao,
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -50,16 +109,18 @@ class PerfilTab extends StatelessWidget {
                         Container(
                           color: Colors.black.withValues(alpha: 0.3),
                         ),
+                        // Botão de alterar Banner
                         Positioned(
                           top: 10,
                           right: 10,
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {},
+                              onTap: _alterarBanner,
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.6),
                                   borderRadius: BorderRadius.circular(10),
@@ -91,6 +152,7 @@ class PerfilTab extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // Bloco da Foto de Perfil + Nome
                         Padding(
                           padding: const EdgeInsets.all(12),
                           child: Align(
@@ -99,30 +161,64 @@ class PerfilTab extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container( // container da foto de perfil
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2F165C),
-                                    borderRadius: BorderRadius.circular(100),
-                                    border: Border.all(
-                                      color: const Color(0xFF5CD825),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Stack(
-                                      children: [
-                                        Image.network(
-                                          'https://cdn.britannica.com/52/243652-050-FEE0A5E4/Actor-Adam-Sandler-2019.jpg',
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
+                                // --- FOTO DE PERFIL CLICÁVEL ---
+                                Stack(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: _alterarFotoPerfil,
+                                      child: Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2F165C),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFF5CD825),
+                                            width: 1.5,
+                                          ),
                                         ),
-                                      ],
+                                        child: ClipOval(
+                                          child: _perfilFile != null
+                                              ? Image.file(
+                                            _perfilFile!,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                          )
+                                              : Image.network(
+                                            _perfilUrlPadrao,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    // Ícone de câmera no canto da foto
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: _alterarFotoPerfil,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.8),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: const Color(0xFF5CD825),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Color(0xFF5CD825),
+                                            size: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 10),
                                 const Text(
@@ -134,7 +230,9 @@ class PerfilTab extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  usuario?.nome != null ? '@${usuario!.nome}' : 'Algo deu errado',
+                                  usuario?.nome != null
+                                      ? '@${usuario!.nome}'
+                                      : 'Algo deu errado',
                                   style: const TextStyle(
                                     color: Colors.purple,
                                     fontSize: 12,
@@ -180,7 +278,8 @@ class PerfilTab extends StatelessWidget {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: listaFavoritos.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 14),
+                          separatorBuilder: (_, _) =>
+                          const SizedBox(width: 14),
                           itemBuilder: (context, index) {
                             final eventoItem = listaFavoritos[index];
                             return PerfilFavoritos(
@@ -189,7 +288,8 @@ class PerfilTab extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => TelaDetalheEvento(evento: eventoItem),
+                                    builder: (_) => TelaDetalheEvento(
+                                        evento: eventoItem),
                                   ),
                                 );
                               },
@@ -203,18 +303,17 @@ class PerfilTab extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-// --- SEÇÃO DE SUAS CONQUISTAS ---
+                // --- SEÇÃO DE SUAS CONQUISTAS ---
                 CardSecao(
                   titulo: 'Suas conquistas',
                   icone: Icons.emoji_events_outlined,
                   conteudo: SizedBox(
-                    height: 80, // Altura exata do seu PerfilConquistas
+                    height: 80,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 3, // Quantidade de conquistas que você quer exibir
-                      separatorBuilder: (_, _) => const SizedBox(width: 12), // Espaço entre os cards
+                      itemCount: 3,
+                      separatorBuilder: (_, _) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
-                        // Exemplo de lista de conquistas
                         final conquistas = [
                           {
                             'titulo': 'Pioneiro',
@@ -247,12 +346,47 @@ class PerfilTab extends StatelessWidget {
                       },
                     ),
                   ),
-                )
+                ),
 
+                const SizedBox(height: 20),
+
+                // --- HISTÓRICO DE EVENTOS ---
+                CardSecao(
+                  titulo: 'Histórico de eventos',
+                  icone: Icons.history_rounded,
+                  expansivel: eventos.length > 1,
+                  expandido: _historicoExpandido,
+                  onToggle: () {
+                    setState(() {
+                      _historicoExpandido = !_historicoExpandido;
+                    });
+                  },
+                  conteudo: Column(
+                    children: (_historicoExpandido
+                        ? eventos
+                        : eventos.take(1).toList())
+                        .map((eventoItem) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: CardHistoricoEvento(
+                          evento: eventoItem,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    TelaDetalheEvento(evento: eventoItem),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ],
             ),
           );
-
         } else {
           return SizedBox(
             height: MediaQuery.of(context).size.height * 0.7,

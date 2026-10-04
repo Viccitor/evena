@@ -13,6 +13,9 @@ class Evento {
   final double latitude;
   final double longitude;
   final List<String> comodidades;
+  final double? preco;
+  final String organizador;
+  final String? linkIngressos;
 
   Evento({
     required this.id,
@@ -29,6 +32,9 @@ class Evento {
     required this.latitude,
     required this.longitude,
     this.comodidades = const [],
+    this.preco,
+    this.organizador = 'Evena Oficial',
+    this.linkIngressos,
     // Parâmetros opcionais para compatibilidade retroativa com código legado
     String? dia,
     String? mes,
@@ -92,6 +98,13 @@ class Evento {
           ?.map((e) => e.toString())
           .toList() ??
           const [],
+      preco: double.tryParse(
+        (json['preco'] ?? json['price'] ?? json['valor'] ?? '').toString(),
+      ),
+      organizador:
+      (json['organizador'] ?? json['organizer'] ?? 'Evena Oficial')
+          .toString(),
+      linkIngressos: (json['linkIngressos'] ?? json['ticketUrl'])?.toString(),
     );
   }
 
@@ -114,6 +127,9 @@ class Evento {
       'latitude': latitude,
       'longitude': longitude,
       'comodidades': comodidades,
+      'preco': preco,
+      'organizador': organizador,
+      'linkIngressos': linkIngressos,
     };
   }
 

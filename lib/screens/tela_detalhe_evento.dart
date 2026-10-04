@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:evena/components/mini_mapa_evento.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:evena/components/card_comodidade.dart';
+import 'package:flutter/services.dart';
+import 'package:evena/components/secao_compra_evento.dart';
 
 class TelaDetalheEvento extends StatelessWidget {
   final Evento evento;
@@ -25,6 +27,44 @@ class TelaDetalheEvento extends StatelessWidget {
     });
 
     await _abrirUrl(context, uri, 'Não foi possível abrir o Google Maps.');
+  }
+
+  Future<void> _abrirIngressos(BuildContext context) async {
+    final uri = Uri.tryParse(evento.linkIngressos ?? '');
+
+    if (uri == null) return;
+
+    await _abrirUrl(context, uri, 'Não foi possível abrir o link dos ingressos.');
+  }
+
+  Future<void> _alternarFavorito(BuildContext context) async {
+    final sucesso = await FavoritosService.instance.alternar(evento.id);
+
+    if (!sucesso && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível atualizar os favoritos.')),
+      );
+    }
+  }
+
+  Future<void> _compartilhar(BuildContext context) async {
+    final texto =
+        '${evento.titulo}\n${evento.dia} ${evento.mes} • ${evento.hora}\n${evento.local} - ${evento.endereco}';
+
+    await Clipboard.setData(ClipboardData(text: texto));
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Informações do evento copiadas.')),
+    );
+  }
+
+  void _reportar(BuildContext context) {
+    // Provisório: ainda não existe endpoint de denúncia na API.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Ta com pressa?')),
+    );
   }
 
   Future<void> _abrirGoogleCalendar(BuildContext context) async {
@@ -189,46 +229,27 @@ class TelaDetalheEvento extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            _CardInfo(
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_month_rounded,
-                    color: Color(0xFF63D13E),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${evento.dia} ${evento.mes} • ${evento.hora}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        const Text(
-                          'Adicione para não esquecer',
-                          style: TextStyle(color: Colors.white54, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => _abrirGoogleCalendar(context),
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Agenda'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF63D13E),
-                    ),
-                  ),
-                ],
+            AnimatedBuilder(
+              animation: favoritos,
+              builder: (context, _) => SecaoCompraEvento(
+                preco: evento.preco,
+                organizador: evento.organizador,
+                seguidores: 0,
+                dataTexto: formatarDataExtenso(evento.inicio),
+                horaTexto: evento.hora,
+                favoritado: favoritos.contem(evento.id),
+                onGarantirIngressos: (evento.linkIngressos ?? '').isEmpty
+                    ? null
+                    : () => _abrirIngressos(context),
+                onSalvar: () => _alternarFavorito(context),
+                onAgenda: () => _abrirGoogleCalendar(context),
+                onCompartilhar: () => _compartilhar(context),
+                onReportar: () => _reportar(context),
               ),
             ),
+
             const SizedBox(height: 14),
+
             const Text(
               'Sobre o evento',
               style: TextStyle(

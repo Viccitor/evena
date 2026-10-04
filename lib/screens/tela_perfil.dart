@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:evena/services/usuario_service.dart';
+import 'package:evena/services/auth_service.dart';
 import 'package:evena/screens/tela_login.dart';
 import 'package:evena/components/card_secao.dart';
 import 'package:evena/components/perfil_favoritos.dart';
@@ -65,12 +65,11 @@ class _PerfilTabState extends State<PerfilTab> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: UsuarioService.instance,
+      listenable: AuthService.perfilListenable,
       builder: (context, _) {
-        final usuario = UsuarioService.instance.usuario;
-        final estaLogado = UsuarioService.instance.estaLogado;
+        final perfil = AuthService.perfilAtual;
 
-        if (estaLogado) {
+        if (perfil != null) {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
             child: Column(
@@ -221,24 +220,24 @@ class _PerfilTabState extends State<PerfilTab> {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'Victor',
-                                  style: TextStyle(
+
+                                Text(
+                                  perfil.nome,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  usuario?.nome != null
-                                      ? '@${usuario!.nome}'
-                                      : 'Algo deu errado',
+                                  perfil.email,
                                   style: const TextStyle(
                                     color: Colors.purple,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+
                               ],
                             ),
                           ),

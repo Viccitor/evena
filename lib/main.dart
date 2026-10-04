@@ -1,14 +1,17 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:evena/screens/tela_home.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:evena/services/usuario_service.dart';
+import 'package:evena/services/auth_service.dart';
+import 'package:evena/services/favoritos_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await UsuarioService.instance.carregarSessaoSalva();
+  await AuthService.restaurarSessao();
+  unawaited(FavoritosService.instance.carregar()); // sem travar a abertura
 
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();

@@ -1,14 +1,74 @@
+import 'dart:convert';
+
 import 'package:evena/models/perfil.dart';
 import 'package:evena/services/api_service.dart';
+import 'package:evena/services/favoritos_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   AuthService._();
 
-  static Perfil? _perfilAtual;
+  static const String _chaveSessao = 'perfil_logado';
+  static const String _chaveSessaoLegada = 'usuario_logado';
 
-  static Perfil? get perfilAtual => _perfilAtual;
+  /// Única fonte de verdade do usuário logado.
+  /// Use [perfilListenable] em ValueListenableBuilder para a UI reagir
+  /// a login/logout.
+  static final ValueNotifier<Perfil?> perfilListenable =
+  ValueNotifier<Perfil?>(null);
 
-  static bool get estaLogado => _perfilAtual != null;
+  static Perfil? get perfilAtual => perfilListenable.value;
+
+  static bool get estaLogado => perfilAtual != null;
+
+  // ---------------------------------------------------------------------------
+  // Sessão
+  // ---------------------------------------------------------------------------
+
+  /// Chamar no main() antes do runApp para restaurar o login salvo.
+  static Future<void> restaurarSessao() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dados = prefs.getString(_chaveSessao);
+
+      if (dados != null) {
+        perfilListenable.value = Perfil.fromJson(
+          jsonDecode(dados) as Map<String, dynamic>,
+        );
+      }
+
+      // Remove a chave antiga usada pelo UsuarioService.
+      await prefs.remove(_chaveSessaoLegada);
+    } catch (_) {
+      perfilListenable.value = null;
+    }
+  }
+
+  static Future<void> _iniciarSessao(Perfil perfil) async {
+    perfilListenable.value = perfil;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_chaveSessao, jsonEncode(perfil.toJson()));
+    } catch (_) {
+      // Se não conseguir salvar, o usuário continua logado nesta execução.
+    }
+  }
+
+  static Future<void> sair() async {
+    perfilListenable.value = null;
+    FavoritosService.instance.limpar();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_chaveSessao);
+    } catch (_) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // Validações
+  // ---------------------------------------------------------------------------
 
   static String normalizarEmail(String email) => email.trim().toLowerCase();
 
@@ -60,24 +120,26 @@ class AuthService {
     return null;
   }
 
+  // ---------------------------------------------------------------------------
+  // API
+  // ---------------------------------------------------------------------------
+
   static Future<String?> cadastrar({
     required String nome,
     required String email,
     required String senha,
   }) async {
     try {
-      final data =
-      await ApiService.post(
+      final data = await ApiService.post(
         '/perfis/cadastrar',
         body: {
           'nome': nome.trim(),
           'email': normalizarEmail(email),
           'senha': senha,
         },
-      )
-      as Map<String, dynamic>;
+      ) as Map<String, dynamic>;
 
-      _perfilAtual = Perfil.fromJson(data);
+      await _iniciarSessao(Perfil.fromJson(data));
       return null;
     } on ApiException catch (erro) {
       return erro.mensagem;
@@ -91,14 +153,12 @@ class AuthService {
     required String senha,
   }) async {
     try {
-      final data =
-      await ApiService.post(
+      final data = await ApiService.post(
         '/perfis/autenticar',
         body: {'email': normalizarEmail(email), 'senha': senha},
-      )
-      as Map<String, dynamic>;
+      ) as Map<String, dynamic>;
 
-      _perfilAtual = Perfil.fromJson(data);
+      await _iniciarSessao(Perfil.fromJson(data));
       return null;
     } on ApiException catch (erro) {
       return erro.mensagem;
@@ -123,9 +183,5 @@ class AuthService {
     } catch (_) {
       return 'Não foi possível conectar com a API.';
     }
-  }
-
-  static void sair() {
-    _perfilAtual = null;
   }
 }

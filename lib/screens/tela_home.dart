@@ -10,7 +10,6 @@ import 'package:evena/screens/tela_inicio.dart';
 import 'package:evena/screens/tela_pesquisa.dart';
 import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
-import 'package:evena/services/usuario_service.dart';
 import 'package:evena/services/auth_service.dart';
 
 class TelaHome extends StatefulWidget {
@@ -365,8 +364,7 @@ class _TelaHomeState extends State<TelaHome> {
                   style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
                 ),
                 onTap: () async {
-                  AuthService.sair();
-                  await UsuarioService.instance.deslogar();
+                  await AuthService.sair();
 
                   if (!context.mounted) return;
 

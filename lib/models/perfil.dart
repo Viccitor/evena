@@ -17,6 +17,12 @@ class Perfil {
     this.descricao,
   });
 
+  /// Primeiro nome para saudações (ex.: "Olá, João!").
+  String get primeiroNome {
+    final partes = nome.trim().split(RegExp(r'\s+'));
+    return partes.first.isEmpty ? 'Visitante' : partes.first;
+  }
+
   factory Perfil.fromJson(Map<String, dynamic> json) {
     return Perfil(
       id: json['id'] as int,
@@ -34,6 +40,10 @@ class Perfil {
       'id': id,
       'nome': nome,
       'email': email,
+      'telefone': telefone,
+      'foto': foto,
+      'banner': banner,
+      'descricao': descricao,
     };
   }
 }

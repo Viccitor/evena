@@ -6,7 +6,7 @@ import 'package:evena/services/favoritos_service.dart';
 import 'package:evena/screens/tela_cadastro.dart';
 import 'package:evena/screens/tela_esqueceu_senha.dart';
 import 'package:evena/screens/tela_home.dart';
-import 'package:evena/services/usuario_service.dart';
+
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -65,15 +65,6 @@ class _TelaLoginState extends State<TelaLogin> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
       return;
     }
-
-    // 1. Pega os dados do usuário atual salvos pelo AuthService e salva no UsuarioService
-    // (Caso seu AuthService guarde o usuário retornado pela API ou você passe o mapa retornado)
-    if (AuthService.perfilAtual != null) {
-      await UsuarioService.instance.salvarSessao(AuthService.perfilAtual!.toJson());
-    }
-
-    // 2. Carrega os favoritos
-    await FavoritosService.instance.carregar();
 
     await FavoritosService.instance.carregar();
 

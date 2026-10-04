@@ -2,6 +2,7 @@ import 'package:evena/models/evento.dart';
 import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:evena/components/mini_mapa_evento.dart';
 
 class TelaDetalheEvento extends StatelessWidget {
   final Evento evento;
@@ -314,7 +315,9 @@ class TelaDetalheEvento extends StatelessWidget {
                     evento.endereco,
                     style: const TextStyle(color: Colors.white60, height: 1.35),
                   ),
+
                   const SizedBox(height: 14),
+
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -331,6 +334,19 @@ class TelaDetalheEvento extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // ⬇️ ADICIONE ISTO
+                  const SizedBox(height: 14),
+
+                  MiniMapaEvento(
+                    latitude: evento.latitude,
+                    longitude: evento.longitude,
+                    titulo: evento.titulo,
+                    local: evento.local,
+                  ),
+                  // ⬆️ ATÉ AQUI
+
+
                 ],
               ),
             ),

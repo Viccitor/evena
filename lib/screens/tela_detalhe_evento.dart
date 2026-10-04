@@ -3,6 +3,7 @@ import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:evena/components/mini_mapa_evento.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class TelaDetalheEvento extends StatelessWidget {
   final Evento evento;
@@ -322,8 +323,11 @@ class TelaDetalheEvento extends StatelessWidget {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () => _abrirGoogleMaps(context),
-                      icon: const Icon(Icons.directions_outlined),
-                      label: const Text('Abrir no Google Maps'),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.mapLocationDot,
+                        size: 16,
+                      ),
+                      label: const Text('Como chegar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Color(0xFF7C2BDC)),
@@ -335,7 +339,6 @@ class TelaDetalheEvento extends StatelessWidget {
                     ),
                   ),
 
-                  // ⬇️ ADICIONE ISTO
                   const SizedBox(height: 14),
 
                   MiniMapaEvento(
@@ -344,7 +347,7 @@ class TelaDetalheEvento extends StatelessWidget {
                     titulo: evento.titulo,
                     local: evento.local,
                   ),
-                  // ⬆️ ATÉ AQUI
+
 
 
                 ],

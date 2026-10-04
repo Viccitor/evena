@@ -332,20 +332,30 @@ class _TelaHomeState extends State<TelaHome> {
                       _mudarAba(1);
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.person_add_alt_1_rounded,
-                      color: Colors.white60,
-                    ),
-                    title: const Text(
-                      'Cadastro / Login',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const TelaInicio()),
+
+                  ValueListenableBuilder(
+                    valueListenable: AuthService.perfilListenable,
+                    builder: (context, perfil, _) {
+                      if (perfil != null) return const SizedBox.shrink();
+
+                      return ListTile(
+                        leading: const Icon(
+                          Icons.person_add_alt_1_rounded,
+                          color: Colors.white60,
+                        ),
+                        title: const Text(
+                          'Cadastro / Login',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TelaInicio(),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -354,27 +364,45 @@ class _TelaHomeState extends State<TelaHome> {
             ),
 
             // --- RODAPÉ (FIXO EMBAIXO) ---
-            const Divider(color: Colors.white12, height: 1), // Linha separadora sutil
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                leading: const Icon(Icons.logout, color: Colors.redAccent),
-                title: const Text(
-                  'Sair',
-                  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
-                ),
-                onTap: () async {
-                  await AuthService.sair();
+            ValueListenableBuilder(
+              valueListenable: AuthService.perfilListenable,
+              builder: (context, perfil, _) {
 
-                  if (!context.mounted) return;
+                if (perfil == null) return const SizedBox.shrink();
 
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const TelaHome()),
-                        (route) => false,
-                  );
-                },
-              ),
+                return Column(
+                  children: [
+                    const Divider(color: Colors.white12, height: 1),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        leading:
+                        const Icon(Icons.logout, color: Colors.redAccent),
+                        title: const Text(
+                          'Sair',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () async {
+                          await AuthService.sair();
+
+                          if (!context.mounted) return;
+
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TelaHome(),
+                            ),
+                                (route) => false,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

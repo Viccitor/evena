@@ -46,6 +46,7 @@ dependencies:
   webview_flutter: ^4.14.1
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
+  font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
   flutter_test:

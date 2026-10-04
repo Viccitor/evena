@@ -24,7 +24,7 @@ class CardSecao extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF09071A),
+        color: const Color(0xFF140E32),
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: const Color(0xFF7C2BDC).withValues(alpha: 0.3),

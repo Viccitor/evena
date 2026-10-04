@@ -175,10 +175,10 @@ class _TelaHomeState extends State<TelaHome> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF00000C),
+      backgroundColor: const Color(0xFF080427),
       drawer: _buildDrawer(),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF01011D),
+        backgroundColor: const Color(0xFF080427),
         iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: -12,
         title: Image.asset(

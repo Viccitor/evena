@@ -12,6 +12,7 @@ class Evento {
   final String classificacao;
   final double latitude;
   final double longitude;
+  final List<String> comodidades;
 
   Evento({
     required this.id,
@@ -27,6 +28,7 @@ class Evento {
     this.classificacao = 'Livre',
     required this.latitude,
     required this.longitude,
+    this.comodidades = const [],
     // Parâmetros opcionais para compatibilidade retroativa com código legado
     String? dia,
     String? mes,
@@ -86,6 +88,10 @@ class Evento {
       dia: json['dia']?.toString(),
       mes: json['mes']?.toString(),
       hora: json['hora']?.toString(),
+      comodidades: ((json['comodidades'] ?? json['facilidades']) as List?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          const [],
     );
   }
 
@@ -107,6 +113,7 @@ class Evento {
       'classificacao': classificacao,
       'latitude': latitude,
       'longitude': longitude,
+      'comodidades': comodidades,
     };
   }
 

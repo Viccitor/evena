@@ -1,9 +1,11 @@
+import 'package:evena/components/card_secao.dart';
 import 'package:evena/models/evento.dart';
 import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:evena/components/mini_mapa_evento.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:evena/components/card_comodidade.dart';
 
 class TelaDetalheEvento extends StatelessWidget {
   final Evento evento;
@@ -350,9 +352,20 @@ class TelaDetalheEvento extends StatelessWidget {
 
 
 
+
+
                 ],
               ),
             ),
+
+            SizedBox(height: 20),
+
+            CardSecao(
+              titulo: 'Comodidades e Facilidades',
+              icone: Icons.checklist_rounded,
+              conteudo: GradeComodidades(ativas: evento.comodidades),
+            ),
+
           ],
         ),
       ),

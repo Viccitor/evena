@@ -15,6 +15,7 @@ final List<Evento> eventos = [
     categoria: 'Networking',
     latitude: -23.561414,
     longitude: -46.655881,
+    comodidades: ['wifi', 'acessibilidade', 'banheiros', 'ar_condicionado'],
   ),
   Evento(
     id: '2',
@@ -31,6 +32,7 @@ final List<Evento> eventos = [
     categoria: 'Música',
     latitude: -23.545803,
     longitude: -46.721471,
+    comodidades: ['alimentacao', 'banheiros', 'pet_friendly', 'acessibilidade'],
   ),
   Evento(
     id: '3',
@@ -46,6 +48,7 @@ final List<Evento> eventos = [
     categoria: 'Tecnologia',
     latitude: -23.515278,
     longitude: -46.617222,
+    comodidades: ['acessibilidade', 'wifi', 'banheiros', 'estacionamento'],
   ),
   Evento(
     id: '4',
@@ -61,6 +64,7 @@ final List<Evento> eventos = [
     categoria: 'Workshop',
     latitude: -23.562778,
     longitude: -46.653889,
+    comodidades: ['wifi', 'ar_condicionado', 'alimentacao'],
   ),
   Evento(
     id: '5',
@@ -76,6 +80,7 @@ final List<Evento> eventos = [
     categoria: 'Gastronomia',
     latitude: -23.541806,
     longitude: -46.629167,
+    comodidades: ['alimentacao', 'acessibilidade', 'banheiros'],
   ),
   Evento(
     id: '6',
@@ -91,6 +96,7 @@ final List<Evento> eventos = [
     categoria: 'Networking',
     latitude: -23.595694,
     longitude: -46.685361,
+    comodidades: ['wifi', 'ar_condicionado', 'acessibilidade', 'estacionamento'],
   ),
   Evento(
     id: '7',
@@ -106,6 +112,7 @@ final List<Evento> eventos = [
     categoria: 'Teatro',
     latitude: -23.565417,
     longitude: -46.650833,
+    comodidades: ['acessibilidade', 'ar_condicionado', 'banheiros'],
   ),
   Evento(
     id: '8',
@@ -121,5 +128,6 @@ final List<Evento> eventos = [
     categoria: 'Workshop',
     latitude: -23.516389,
     longitude: -46.618611,
+    comodidades: ['estacionamento', 'wifi', 'alimentacao', 'acessibilidade', 'banheiros'],
   ),
 ];

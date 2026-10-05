@@ -90,9 +90,17 @@ class _TelaEsqueceuSenhaState extends State<TelaEsqueceuSenha> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.asset(
-                'assets/images/logo_evena_s_fundo.png',
+              child: SizedBox(
                 height: 150,
+                child: OverflowBox(
+                  maxHeight: 400,
+                  maxWidth: 400,
+                  child: Image.asset(
+                    'assets/images/logo_evena_s_fundo.png',
+                    height: 260,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),

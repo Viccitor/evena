@@ -69,42 +69,74 @@ class Evento {
   }
 
   factory Evento.fromJson(Map<String, dynamic> json) {
+    final datas = (json['datas'] as List? ?? [])
+        .map((e) => e.toString())
+        .toList();
+
+    DateTime? inicio;
+
+    if (datas.isNotEmpty) {
+      inicio = DateTime.tryParse(datas.first);
+    }
+
+    DateTime? fim;
+
+    if (datas.isNotEmpty) {
+      fim = DateTime.tryParse(datas.last);
+    }
+
     return Evento(
-      id: (json['id'] ?? json['_id'] ?? '').toString(),
-      titulo: (json['titulo'] ?? json['title'] ?? json['nome'] ?? '').toString(),
-      imagemUrl: (json['imagemUrl'] ?? json['image'] ?? json['imageUrl'] ?? json['banner'] ?? '').toString(),
-      inicio: json['inicio'] != null
-          ? DateTime.tryParse(json['inicio'].toString())
-          : (json['startDate'] != null
-          ? DateTime.tryParse(json['startDate'].toString())
-          : null),
-      fim: json['fim'] != null
-          ? DateTime.tryParse(json['fim'].toString())
-          : (json['endDate'] != null
-          ? DateTime.tryParse(json['endDate'].toString())
-          : null),
-      local: (json['local'] ?? json['place'] ?? json['venue'] ?? json['location'] ?? '').toString(),
-      endereco: (json['endereco'] ?? json['address'] ?? '').toString(),
-      descricao: (json['descricao'] ?? json['description'] ?? '').toString(),
-      formato: (json['formato'] ?? json['format'] ?? json['type'] ?? '').toString(),
-      categoria: (json['categoria'] ?? json['category'] ?? '').toString(),
-      classificacao: (json['classificacao'] ?? json['rating'] ?? 'Livre').toString(),
-      latitude: double.tryParse((json['latitude'] ?? json['lat'] ?? 0).toString()) ?? 0.0,
-      longitude: double.tryParse((json['longitude'] ?? json['lng'] ?? json['lon'] ?? 0).toString()) ?? 0.0,
-      dia: json['dia']?.toString(),
-      mes: json['mes']?.toString(),
-      hora: json['hora']?.toString(),
-      comodidades: ((json['comodidades'] ?? json['facilidades']) as List?)
-          ?.map((e) => e.toString())
-          .toList() ??
-          const [],
-      preco: double.tryParse(
-        (json['preco'] ?? json['price'] ?? json['valor'] ?? '').toString(),
-      ),
-      organizador:
-      (json['organizador'] ?? json['organizer'] ?? 'Evena Oficial')
+      id: (json['id'] ?? '').toString(),
+
+      titulo:
+      (json['titulo'] ?? '').toString(),
+
+      imagemUrl:
+      (json['capa'] ??
+          json['banner'] ??
+          '').toString(),
+
+      inicio: inicio,
+
+      fim: fim,
+
+      local:
+      (json['local'] ?? '').toString(),
+
+      endereco:
+      (json['endereco'] ?? '').toString(),
+
+      descricao:
+      (json['descricao'] ?? '').toString(),
+
+      formato: 'Presencial',
+
+      categoria:
+      (json['categoria'] ?? '').toString(),
+
+      classificacao:
+      (json['classificacao'] ?? 'Livre')
           .toString(),
-      linkIngressos: (json['linkIngressos'] ?? json['ticketUrl'])?.toString(),
+
+      latitude: double.tryParse(
+        (json['latitude'] ?? 0).toString(),
+      ) ?? 0,
+
+      longitude: double.tryParse(
+        (json['longitude'] ?? 0).toString(),
+      ) ?? 0,
+
+      preco: double.tryParse(
+        (json['preco'] ?? '').toString(),
+      ),
+
+      organizador:
+      (json['empresaNome'] ??
+          'Evena Oficial')
+          .toString(),
+
+      linkIngressos:
+      json['link']?.toString(),
     );
   }
 

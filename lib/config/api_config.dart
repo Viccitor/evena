@@ -7,6 +7,6 @@ class ApiConfig {
       return definida.endsWith('/api') ? definida : '$definida/api';
     }
 
-    return 'https://evena-api-renato.azurewebsites.net/api';
+    return 'https://evena-api-dedbaudqbjcegyfn.chilecentral-01.azurewebsites.net/api';
   }
 }

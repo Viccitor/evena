@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:evena/models/evento.dart';
-import 'package:evena/data/eventos_data.dart';
 import 'package:evena/components/card_evento.dart';
 import 'package:evena/components/cards_categoria.dart';
 import 'package:evena/screens/tela_detalhe_evento.dart';
@@ -13,6 +12,7 @@ import 'package:evena/screens/tela_perfil.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:evena/data/categorias_data.dart';
 import 'package:evena/screens/tela_organizador.dart';
+import 'package:evena/services/evento_service.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -25,7 +25,8 @@ class _TelaHomeState extends State<TelaHome> {
   int _indiceAtual = 0;
   late final PageController _pageController;
 
-  List<Evento> _listaEventos = List.from(eventos);
+  final EventoService _eventoService = EventoService.instance;
+  List<Evento> _listaEventos = const [];
   bool _carregandoLocalizacao = false;
   Position? _posicaoAtual;
 
@@ -33,13 +34,50 @@ class _TelaHomeState extends State<TelaHome> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _indiceAtual);
+    _eventoService.addListener(_sincronizarEventos);
+    _sincronizarEventos();
+    if (_eventoService.eventos.isEmpty) {
+      _eventoService.carregar();
+    }
     _ativarLocalizacaoSilenciosa();
   }
 
   @override
   void dispose() {
+    _eventoService.removeListener(_sincronizarEventos);
     _pageController.dispose();
     super.dispose();
+  }
+
+
+  void _sincronizarEventos() {
+    if (!mounted) return;
+    final atualizados = List<Evento>.from(_eventoService.eventos);
+    if (_posicaoAtual != null) {
+      _ordenarPorProximidade(atualizados, _posicaoAtual!);
+    }
+    setState(() => _listaEventos = atualizados);
+  }
+
+  void _ordenarPorProximidade(List<Evento> lista, Position position) {
+    lista.sort((a, b) {
+      if (a.online != b.online) return a.online ? 1 : -1;
+      if (a.online && b.online) return a.inicio.compareTo(b.inicio);
+
+      final distA = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        a.latitude,
+        a.longitude,
+      );
+      final distB = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        b.latitude,
+        b.longitude,
+      );
+      return distA.compareTo(distB);
+    });
   }
 
   /// Tenta obter a localização sem forçar pop-up se já tiver permissão concedida
@@ -115,22 +153,8 @@ class _TelaHomeState extends State<TelaHome> {
       ),
     );
 
-    List<Evento> eventosOrdenados = List.from(_listaEventos);
-    eventosOrdenados.sort((a, b) {
-      double distA = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        a.latitude,
-        a.longitude,
-      );
-      double distB = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        b.latitude,
-        b.longitude,
-      );
-      return distA.compareTo(distB);
-    });
+    final eventosOrdenados = List<Evento>.from(_eventoService.eventos);
+    _ordenarPorProximidade(eventosOrdenados, position);
 
     if (mounted) {
       setState(() {
@@ -194,10 +218,14 @@ class _TelaHomeState extends State<TelaHome> {
         backgroundColor: const Color(0xFF080427),
         iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: -12,
-        title: Image.asset(
-          'assets/images/logo_evena_s_fundo.png',
-          height: 120,
-          fit: BoxFit.contain,
+        title: InkWell(
+          onTap: () => _mudarAba(0),
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            'assets/images/logo_evena_s_fundo.png',
+            height: 120,
+            fit: BoxFit.contain,
+          ),
         ),
         actions: [
           if (_indiceAtual != 2)
@@ -279,17 +307,23 @@ class _TelaHomeState extends State<TelaHome> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
-                    child: SizedBox(
-                      height: 120,
-                      width: double.infinity,
-                      child: ClipRect(
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          alignment: Alignment.centerLeft,
-                          child: Image.asset(
-                            'assets/images/logo_evena_s_fundo.png',
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _mudarAba(0);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+                      child: SizedBox(
+                        height: 120,
+                        width: double.infinity,
+                        child: ClipRect(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              'assets/images/logo_evena_s_fundo.png',
+                            ),
                           ),
                         ),
                       ),
@@ -480,7 +514,7 @@ class _InicioTab extends StatelessWidget {
                 TextSpan(
                   text: 'melhores eventos\n',
                   style: TextStyle(
-                    color: Color(0xFF63D13E),
+                    color: Color(0xFF00FF00),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -82,15 +82,19 @@ class PerfilFavoritos extends StatelessWidget {
                         const SizedBox(height: 1),
                         Row(
                           children: [
-                            const Icon(
-                              Icons.location_on_outlined,
+                            Icon(
+                              evento.online
+                                  ? Icons.language_rounded
+                                  : Icons.location_on_outlined,
                               color: Colors.white70,
                               size: 11,
                             ),
                             const SizedBox(width: 2),
                             Expanded(
                               child: Text(
-                                '${evento.local} - ${evento.hora}',
+                                evento.online
+                                    ? 'Online - ${evento.hora}'
+                                    : '${evento.local} - ${evento.hora}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -116,7 +120,7 @@ class PerfilFavoritos extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            evento.local,
+                            evento.localExibicao,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

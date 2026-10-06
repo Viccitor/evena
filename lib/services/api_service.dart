@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:evena/config/api_config.dart';
 import 'package:http/http.dart' as http;
@@ -41,6 +42,21 @@ class ApiService {
       body: body == null ? null : jsonEncode(body),
     )
         .timeout(const Duration(seconds: 15));
+
+    return _tratar(response);
+  }
+
+
+  static Future<dynamic> uploadFile(
+    String caminho, {
+    required File arquivo,
+    String campo = 'arquivo',
+  }) async {
+    final request = http.MultipartRequest('POST', _uri(caminho));
+    request.files.add(await http.MultipartFile.fromPath(campo, arquivo.path));
+
+    final streamed = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamed);
 
     return _tratar(response);
   }

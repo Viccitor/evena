@@ -151,8 +151,10 @@ class CardEvento extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _InfoLinha(
-                                  icon: Icons.location_on_outlined,
-                                  texto: evento.local,
+                                  icon: evento.online
+                                      ? Icons.language_rounded
+                                      : Icons.location_on_outlined,
+                                  texto: evento.localExibicao,
                                 ),
                               ),
                               const SizedBox(width: 6),

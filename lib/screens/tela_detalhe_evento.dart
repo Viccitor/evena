@@ -48,8 +48,11 @@ class TelaDetalheEvento extends StatelessWidget {
   }
 
   Future<void> _compartilhar(BuildContext context) async {
+    final localTexto = evento.online
+        ? 'Evento online'
+        : '${evento.local} - ${evento.endereco}';
     final texto =
-        '${evento.titulo}\n${evento.dia} ${evento.mes} • ${evento.hora}\n${evento.local} - ${evento.endereco}';
+        '${evento.titulo}\n${evento.dia} ${evento.mes} • ${evento.hora}\n$localTexto';
 
     await Clipboard.setData(ClipboardData(text: texto));
 
@@ -73,7 +76,9 @@ class TelaDetalheEvento extends StatelessWidget {
       'text': evento.titulo,
       'dates': '${_dataGoogle(evento.inicio)}/${_dataGoogle(evento.fim)}',
       'details': evento.descricao,
-      'location': '${evento.local} - ${evento.endereco}',
+      'location': evento.online
+          ? 'Online'
+          : '${evento.local} - ${evento.endereco}',
     });
 
     await _abrirUrl(
@@ -131,7 +136,14 @@ class TelaDetalheEvento extends StatelessWidget {
         backgroundColor: const Color(0xFF01011D),
         iconTheme: const IconThemeData(color: Colors.white),
         titleSpacing: 0,
-        title: Image.asset('assets/images/logo_evena_s_fundo.png', height: 82),
+        title: InkWell(
+          onTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset(
+            'assets/images/logo_evena_s_fundo.png',
+            height: 82,
+          ),
+        ),
         actions: [
           AnimatedBuilder(
             animation: favoritos,
@@ -306,77 +318,117 @@ class TelaDetalheEvento extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _CardInfo(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: Color(0xFF9A77D5),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Localização',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
+              child: evento.online
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.language_rounded,
+                              color: Color(0xFF9A77D5),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Evento online',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    evento.local,
-                    style: const TextStyle(
-                      color: Color(0xFF63D13E),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    evento.endereco,
-                    style: const TextStyle(color: Colors.white60, height: 1.35),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _abrirGoogleMaps(context),
-                      icon: const FaIcon(
-                        FontAwesomeIcons.mapLocationDot,
-                        size: 16,
-                      ),
-                      label: const Text('Como chegar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFF7C2BDC)),
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Este evento acontece pela internet.',
+                          style: TextStyle(color: Colors.white70, height: 1.4),
                         ),
-                      ),
+                        if ((evento.linkIngressos ?? '').isNotEmpty) ...[
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _abrirIngressos(context),
+                              icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                              label: const Text('Acessar evento online'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Color(0xFF7C2BDC)),
+                                padding: const EdgeInsets.symmetric(vertical: 13),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              color: Color(0xFF9A77D5),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Localização',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          evento.local,
+                          style: const TextStyle(
+                            color: Color(0xFF00FF00),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          evento.endereco,
+                          style: const TextStyle(
+                            color: Colors.white60,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _abrirGoogleMaps(context),
+                            icon: const FaIcon(
+                              FontAwesomeIcons.mapLocationDot,
+                              size: 16,
+                            ),
+                            label: const Text('Como chegar'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Color(0xFF7C2BDC)),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        MiniMapaEvento(
+                          latitude: evento.latitude,
+                          longitude: evento.longitude,
+                          titulo: evento.titulo,
+                          local: evento.local,
+                        ),
+                      ],
                     ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  MiniMapaEvento(
-                    latitude: evento.latitude,
-                    longitude: evento.longitude,
-                    titulo: evento.titulo,
-                    local: evento.local,
-                  ),
-
-
-
-
-
-                ],
-              ),
             ),
 
             SizedBox(height: 20),

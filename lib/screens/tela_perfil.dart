@@ -6,7 +6,7 @@ import 'package:evena/screens/tela_login.dart';
 import 'package:evena/components/card_secao.dart';
 import 'package:evena/components/perfil_favoritos.dart';
 import 'package:evena/services/favoritos_service.dart';
-import 'package:evena/data/eventos_data.dart';
+import 'package:evena/services/evento_service.dart';
 import 'package:evena/screens/tela_detalhe_evento.dart';
 import 'package:evena/components/perfil_conquistas.dart';
 import 'package:evena/components/card_historico_evento.dart';
@@ -64,8 +64,10 @@ class _PerfilTabState extends State<PerfilTab> {
 
   @override
   Widget build(BuildContext context) {
+    final eventoService = EventoService.instance;
+
     return ListenableBuilder(
-      listenable: AuthService.perfilListenable,
+      listenable: Listenable.merge([AuthService.perfilListenable, eventoService]),
       builder: (context, _) {
         final perfil = AuthService.perfilAtual;
 
@@ -254,7 +256,7 @@ class _PerfilTabState extends State<PerfilTab> {
                   animation: FavoritosService.instance,
                   builder: (context, _) {
                     final favoritos = FavoritosService.instance;
-                    final listaFavoritos = eventos
+                    final listaFavoritos = eventoService.eventos
                         .where((e) => favoritos.contem(e.id))
                         .toList();
 
@@ -353,7 +355,7 @@ class _PerfilTabState extends State<PerfilTab> {
                 CardSecao(
                   titulo: 'Histórico de eventos',
                   icone: Icons.history_rounded,
-                  expansivel: eventos.length > 1,
+                  expansivel: eventoService.eventos.length > 1,
                   expandido: _historicoExpandido,
                   onToggle: () {
                     setState(() {
@@ -362,8 +364,8 @@ class _PerfilTabState extends State<PerfilTab> {
                   },
                   conteudo: Column(
                     children: (_historicoExpandido
-                        ? eventos
-                        : eventos.take(1).toList())
+                        ? eventoService.eventos
+                        : eventoService.eventos.take(1).toList())
                         .map((eventoItem) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:evena/models/evento.dart';
-import 'package:evena/data/eventos_data.dart';
 import 'package:evena/components/card_evento.dart';
+import 'package:evena/models/evento.dart';
+import 'package:evena/services/evento_service.dart';
 import 'package:evena/services/favoritos_service.dart';
+import 'package:flutter/material.dart';
 
 class FavoritosTab extends StatelessWidget {
   final ValueChanged<Evento> onAbrirEvento;
@@ -12,13 +12,20 @@ class FavoritosTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favoritos = FavoritosService.instance;
+    final eventos = EventoService.instance;
 
-    return AnimatedBuilder(
-      animation: favoritos,
+    return ListenableBuilder(
+      listenable: Listenable.merge([favoritos, eventos]),
       builder: (context, _) {
-        final lista = eventos
+        final lista = eventos.eventos
             .where((evento) => favoritos.contem(evento.id))
             .toList();
+
+        if (eventos.carregando && eventos.eventos.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF00FF00)),
+          );
+        }
 
         if (lista.isEmpty) {
           return const Center(

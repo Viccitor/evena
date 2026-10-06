@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:evena/components/criar_evento/campos_criar_evento.dart';
 import 'package:evena/components/criar_evento/passo_data_local.dart';
@@ -6,6 +6,9 @@ import 'package:evena/components/criar_evento/passo_detalhes.dart';
 import 'package:evena/components/criar_evento/passo_informacoes.dart';
 import 'package:evena/components/criar_evento/passo_revisao.dart';
 import 'package:evena/models/rascunho_evento.dart';
+import 'package:evena/services/api_service.dart';
+import 'package:evena/services/auth_service.dart';
+import 'package:evena/services/evento_service.dart';
 import 'package:flutter/material.dart';
 
 class TelaCriarEvento extends StatefulWidget {
@@ -30,6 +33,8 @@ class _TelaCriarEventoState extends State<TelaCriarEvento> {
 
   int _passo = 0;
   bool _publicando = false;
+  int _pontosPublicando = 1;
+  Timer? _timerPublicando;
 
   @override
   void initState() {
@@ -44,6 +49,7 @@ class _TelaCriarEventoState extends State<TelaCriarEvento> {
   @override
   void dispose() {
     _rascunho.removeListener(_aoMudar);
+    _timerPublicando?.cancel();
     _rascunho.dispose();
     _scroll.dispose();
     super.dispose();
@@ -94,19 +100,44 @@ class _TelaCriarEventoState extends State<TelaCriarEvento> {
       return;
     }
 
-    setState(() => _publicando = true);
+    final perfil = AuthService.perfilAtual;
+    if (perfil == null) {
+      _mensagem('Entre na sua conta para publicar um evento.');
+      return;
+    }
 
-    // TODO(backend): enviar para a API (ex.: POST /eventos) e fazer o upload
-    // da imagem de capa. Por enquanto só mostra o JSON no console.
-    debugPrint(const JsonEncoder.withIndent('  ').convert(_rascunho.toJson()));
+    setState(() {
+      _publicando = true;
+      _pontosPublicando = 1;
+    });
+    _timerPublicando?.cancel();
+    _timerPublicando = Timer.periodic(const Duration(milliseconds: 450), (_) {
+      if (!mounted || !_publicando) return;
+      setState(() => _pontosPublicando = _pontosPublicando % 3 + 1);
+    });
 
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    try {
+      await EventoService.instance.publicar(
+        rascunho: _rascunho,
+        perfil: perfil,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() => _publicando = false);
-
-    _mensagem('Tudo certo! Falta ligar o envio à API (veja o console).');
+      _mensagem('Evento publicado com sucesso.');
+      Navigator.pop(context, true);
+    } on ApiException catch (erro) {
+      if (!mounted) return;
+      _mensagem(erro.mensagem);
+    } catch (_) {
+      if (!mounted) return;
+      _mensagem('Não foi possível publicar o evento.');
+    } finally {
+      _timerPublicando?.cancel();
+      if (mounted) {
+        setState(() => _publicando = false);
+      }
+    }
   }
 
   Future<void> _voltarOuSair() async {
@@ -261,7 +292,9 @@ class _TelaCriarEventoState extends State<TelaCriarEvento> {
               ),
               child: Text(
                 ultimo
-                    ? (_publicando ? 'Publicando...' : 'Publicar evento')
+                    ? (_publicando
+                        ? 'Publicando${List.filled(_pontosPublicando, '.').join()}'
+                        : 'Publicar evento')
                     : 'Continuar →',
               ),
             ),

@@ -109,7 +109,7 @@ class Evento {
       descricao:
       (json['descricao'] ?? '').toString(),
 
-      formato: 'Presencial',
+      formato: _inferirFormato(json),
 
       categoria:
       (json['categoria'] ?? '').toString(),
@@ -139,6 +139,24 @@ class Evento {
       json['link']?.toString(),
     );
   }
+
+
+  static String _inferirFormato(Map<String, dynamic> json) {
+    final formato = json['formato']?.toString().trim();
+    if (formato != null && formato.isNotEmpty) return formato;
+
+    final local = json['local']?.toString().trim() ?? '';
+    final endereco = json['endereco']?.toString().trim() ?? '';
+    final link = json['link']?.toString().trim() ?? '';
+
+    if (local.isEmpty && endereco.isEmpty && link.isNotEmpty) {
+      return 'Online';
+    }
+    return 'Presencial';
+  }
+
+  bool get online => formato.toLowerCase() == 'online';
+  String get localExibicao => online ? 'Evento online' : local;
 
   // Alias para manter compatibilidade caso algum ponto use 'fromMap'
   factory Evento.fromMap(Map<String, dynamic> map) => Evento.fromJson(map);

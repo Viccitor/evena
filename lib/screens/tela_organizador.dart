@@ -5,8 +5,6 @@ import 'package:evena/screens/tela_login.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-/// Tela de apresentação para organizadores. É o caminho do botão
-/// "Criar evento" do drawer até o assistente de criação.
 class TelaOrganizador extends StatelessWidget {
   const TelaOrganizador({super.key});
 
@@ -30,8 +28,6 @@ class TelaOrganizador extends StatelessWidget {
   }
 
   void _criarContaOrganizador(BuildContext context) {
-    // Por enquanto usa o cadastro normal: ainda não existe um cadastro
-    // específico de organizador na API.
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const TelaCadastro()),
@@ -49,14 +45,31 @@ class TelaOrganizador extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00FF00).withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF00FF00).withValues(alpha: .32),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.campaign_rounded,
+                  color: Color(0xFF00FF00),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 18),
               const Text(
-                'Para Organizadores',
+                'Para organizadores',
                 style: TextStyle(
-                  color: Color(0xFF63D13E),
+                  color: Color(0xFF00FF00),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -74,41 +87,60 @@ class TelaOrganizador extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'seu evento',
-                      style: TextStyle(color: Color(0xFF63D13E)),
+                      style: TextStyle(color: Color(0xFF00FF00)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
               const Text(
-                'Crie a divulgação dos seus próprios eventos e acompanhe '
-                    'visualizações, cliques em “Eu Vou” e favoritos em um painel '
-                    'de métricas próprio.',
+                'Cadastre sua programação com data, formato, localização ou link online e deixe tudo pronto para aparecer no Evena.',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
-                  height: 1.5,
+                  height: 1.55,
                 ),
               ),
               const SizedBox(height: 24),
               const _CardBeneficio(
-                titulo: 'Alcance nacional',
-                descricao: 'Seu evento aparece no mapa e nos filtros de quem '
-                    'está buscando na sua região.',
+                icone: Icons.travel_explore_rounded,
+                titulo: 'Mais fácil de descobrir',
+                descricao:
+                    'Seu evento entra na busca e nas categorias da plataforma para o público encontrar.',
               ),
               const SizedBox(height: 12),
               const _CardBeneficio(
-                titulo: 'Selo de verificação',
-                descricao: 'Empresas com CNPJ validado recebem selo e ganham '
-                    'prioridade na listagem.',
+                icone: Icons.devices_rounded,
+                titulo: 'Presencial ou online',
+                descricao:
+                    'Informe endereço para eventos presenciais ou o link de acesso quando o evento for online.',
               ),
+              const SizedBox(height: 12),
+              const _CardBeneficio(
+                icone: Icons.photo_camera_back_rounded,
+                titulo: 'Divulgação completa',
+                descricao:
+                    'Adicione capa, descrição, categoria, data e atrações em um fluxo simples de publicação.',
+              ),
+              const SizedBox(height: 26),
+              const Text(
+                'Como funciona',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _Passo(numero: '1', texto: 'Preencha as informações do evento'),
+              const _Passo(numero: '2', texto: 'Revise data, formato e detalhes'),
+              const _Passo(numero: '3', texto: 'Publique e acompanhe o evento no app'),
               const SizedBox(height: 28),
               BotaoCustomizado(
                 texto: 'Crie seu evento',
                 temSeta: true,
                 onPressed: () => _criarEvento(context),
               ),
-              // Quem já está logado não precisa criar conta de novo.
               ValueListenableBuilder(
                 valueListenable: AuthService.perfilListenable,
                 builder: (context, perfil, _) {
@@ -117,7 +149,7 @@ class TelaOrganizador extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: BotaoCustomizado(
-                      texto: 'Crie sua conta de organizador',
+                      texto: 'Criar conta',
                       isSecundario: true,
                       onPressed: () => _criarContaOrganizador(context),
                     ),
@@ -133,10 +165,15 @@ class TelaOrganizador extends StatelessWidget {
 }
 
 class _CardBeneficio extends StatelessWidget {
+  final IconData icone;
   final String titulo;
   final String descricao;
 
-  const _CardBeneficio({required this.titulo, required this.descricao});
+  const _CardBeneficio({
+    required this.icone,
+    required this.titulo,
+    required this.descricao,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -145,38 +182,92 @@ class _CardBeneficio extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: const Color(0xFF140E32),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF7C2BDC).withValues(alpha: .28),
+          color: const Color(0xFF2F1A67).withValues(alpha: .9),
         ),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 26,
-            height: 3,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFF63D13E),
-              borderRadius: BorderRadius.circular(2),
+              color: const Color(0xFF00FF00).withValues(alpha: .10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icone, color: const Color(0xFF00FF00), size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titulo,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  descricao,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            titulo,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+        ],
+      ),
+    );
+  }
+}
+
+class _Passo extends StatelessWidget {
+  final String numero;
+  final String texto;
+
+  const _Passo({required this.numero, required this.texto});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2F1A67),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              numero,
+              style: const TextStyle(
+                color: Color(0xFF00FF00),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            descricao,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              height: 1.4,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              texto,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                height: 1.35,
+              ),
             ),
           ),
         ],

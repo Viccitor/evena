@@ -58,6 +58,16 @@ const List<Comodidade> comodidadesCatalogo = [
     titulo: 'Espaço kids',
     icone: Icons.child_friendly_rounded,
   ),
+  Comodidade(
+    chave: 'guarda_volumes',
+    titulo: 'Guarda-volumes',
+    icone: Icons.luggage_rounded,
+  ),
+  Comodidade(
+    chave: 'ar_condicionado',
+    titulo: 'Ar-condicionado',
+    icone: Icons.ac_unit_rounded,
+  ),
 ];
 
 /// Grade de comodidades, 2 por linha.

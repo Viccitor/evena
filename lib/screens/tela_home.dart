@@ -12,6 +12,7 @@ import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:evena/data/categorias_data.dart';
+import 'package:evena/screens/tela_organizador.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -342,6 +343,26 @@ class _TelaHomeState extends State<TelaHome> {
                     onTap: () {
                       Navigator.pop(context);
                       _mudarAba(1);
+                    },
+                  ),
+
+                  ListTile(
+                    leading: const Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: Color(0xFF63D13E),
+                    ),
+                    title: const Text(
+                      'Criar evento',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TelaOrganizador(),
+                        ),
+                      );
                     },
                   ),
 

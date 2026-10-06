@@ -37,14 +37,19 @@ class EventoService extends ChangeNotifier {
     }
   }
 
-  List<Evento> pesquisar(String termo) {
+  List<Evento> pesquisar(String termo, {String? categoria}) {
     final busca = _normalizar(termo.trim());
-
-    if (busca.isEmpty) {
-      return eventos;
-    }
+    final filtroCategoria =
+    categoria == null ? '' : _normalizar(categoria.trim());
 
     return _eventos.where((evento) {
+      if (filtroCategoria.isNotEmpty &&
+          _normalizar(evento.categoria.trim()) != filtroCategoria) {
+        return false;
+      }
+
+      if (busca.isEmpty) return true;
+
       final textoCompleto = _normalizar(
         '${evento.titulo} ${evento.categoria} ${evento.local} ${evento.endereco} ${evento.descricao} ${evento.formato}',
       );

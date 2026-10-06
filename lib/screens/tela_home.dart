@@ -11,6 +11,7 @@ import 'package:evena/screens/tela_pesquisa.dart';
 import 'package:evena/screens/tela_favoritos.dart';
 import 'package:evena/screens/tela_perfil.dart';
 import 'package:evena/services/auth_service.dart';
+import 'package:evena/data/categorias_data.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -152,6 +153,16 @@ class _TelaHomeState extends State<TelaHome> {
     );
   }
 
+  void _abrirCategoria(String categoria) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TelaPesquisa(categoriaInicial: categoria),
+      ),
+    );
+  }
+
+
   void _mudarAba(int index) {
     _pageController.animateToPage(
       index,
@@ -164,6 +175,7 @@ class _TelaHomeState extends State<TelaHome> {
   Widget build(BuildContext context) {
     final paginas = [
       _InicioTab(
+        onAbrirCategoria: _abrirCategoria,
         onAbrirEvento: _abrirEvento,
         eventos: _listaEventos,
         posicaoAtual: _posicaoAtual,
@@ -417,6 +429,7 @@ class _InicioTab extends StatelessWidget {
   final Position? posicaoAtual;
   final bool carregandoLocalizacao;
   final VoidCallback onSolicitarLocalizacao;
+  final ValueChanged<String> onAbrirCategoria;
 
   const _InicioTab({
     required this.onAbrirEvento,
@@ -424,6 +437,7 @@ class _InicioTab extends StatelessWidget {
     required this.posicaoAtual,
     required this.carregandoLocalizacao,
     required this.onSolicitarLocalizacao,
+    required this.onAbrirCategoria,
   });
 
   @override
@@ -548,39 +562,18 @@ class _InicioTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          const SingleChildScrollView(
+          SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                CardCategoria(
-                  caminhoImagem: 'assets/images/negocios.png',
-                  texto: 'Networking',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/shows.png',
-                  texto: 'Música',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/teatro.png',
-                  texto: 'Teatro',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/viagem.png',
-                  texto: 'Festival',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/tech.png',
-                  texto: 'Tecnologia',
-                ),
-                SizedBox(width: 10),
-                CardCategoria(
-                  caminhoImagem: 'assets/images/gastronomia.png',
-                  texto: 'Gastronomia',
-                ),
+                for (final categoria in categoriasEventos) ...[
+                  CardCategoria(
+                    caminhoImagem: categoria.imagem,
+                    texto: categoria.nome,
+                    onTap: () => onAbrirCategoria(categoria.nome),
+                  ),
+                  const SizedBox(width: 10),
+                ],
               ],
             ),
           ),

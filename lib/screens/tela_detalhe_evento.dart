@@ -6,13 +6,30 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:evena/components/mini_mapa_evento.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:evena/components/card_comodidade.dart';
-import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:evena/components/secao_compra_evento.dart';
+import 'package:evena/components/seletor_data_evento.dart';
+import 'package:evena/components/secao_atracoes_evento.dart';
 
-class TelaDetalheEvento extends StatelessWidget {
+class TelaDetalheEvento extends StatefulWidget {
   final Evento evento;
 
   const TelaDetalheEvento({super.key, required this.evento});
+
+  @override
+  State<TelaDetalheEvento> createState() => _TelaDetalheEventoState();
+}
+
+class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
+  Evento get evento => widget.evento;
+
+  /// Índice da data escolhida na aba de datas.
+  int _indiceData = 0;
+
+  DataEvento get _dataAtual {
+    final ultimo = evento.datas.length - 1;
+    return evento.datas[_indiceData.clamp(0, ultimo)];
+  }
 
   String _dois(int valor) => valor.toString().padLeft(2, '0');
 
@@ -47,19 +64,47 @@ class TelaDetalheEvento extends StatelessWidget {
     }
   }
 
+  String _slugEvento(String titulo) {
+    var slug = titulo.toLowerCase().trim();
+
+    const acentos = {
+      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a', 'ä': 'a',
+      'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+      'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
+      'ó': 'o', 'ò': 'o', 'õ': 'o', 'ô': 'o', 'ö': 'o',
+      'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
+      'ç': 'c',
+    };
+
+    acentos.forEach((comAcento, semAcento) {
+      slug = slug.replaceAll(comAcento, semAcento);
+    });
+
+    return slug
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+  }
+
+  String _linkPublicoEvento() {
+    return 'https://evena.online/detalhes-evento/${_slugEvento(evento.titulo)}';
+  }
+
   Future<void> _compartilhar(BuildContext context) async {
     final localTexto = evento.online
         ? 'Evento online'
         : '${evento.local} - ${evento.endereco}';
+    final linkEvento = _linkPublicoEvento();
     final texto =
-        '${evento.titulo}\n${evento.dia} ${evento.mes} • ${evento.hora}\n$localTexto';
+        '${evento.titulo}\n'
+        '${evento.datas.map((d) => '${d.dia} ${d.mes} • ${d.hora}').join('\n')}\n'
+        '$localTexto\n\n'
+        'Veja no Evena:\n$linkEvento';
 
-    await Clipboard.setData(ClipboardData(text: texto));
-
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Informações do evento copiadas.')),
+    await SharePlus.instance.share(
+      ShareParams(
+        text: texto,
+        subject: evento.titulo,
+      ),
     );
   }
 
@@ -74,7 +119,7 @@ class TelaDetalheEvento extends StatelessWidget {
     final uri = Uri.https('calendar.google.com', '/calendar/render', {
       'action': 'TEMPLATE',
       'text': evento.titulo,
-      'dates': '${_dataGoogle(evento.inicio)}/${_dataGoogle(evento.fim)}',
+      'dates': '${_dataGoogle(_dataAtual.inicio)}/${_dataGoogle(_dataAtual.fimOuInicio)}',
       'details': evento.descricao,
       'location': evento.online
           ? 'Online'
@@ -241,14 +286,22 @@ class TelaDetalheEvento extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
+            if (evento.temVariasDatas) ...[
+              SeletorDataEvento(
+                datas: evento.datas,
+                selecionada: _indiceData,
+                onSelecionar: (i) => setState(() => _indiceData = i),
+              ),
+              const SizedBox(height: 18),
+            ],
             AnimatedBuilder(
               animation: favoritos,
               builder: (context, _) => SecaoCompraEvento(
                 preco: evento.preco,
                 organizador: evento.organizador,
                 seguidores: 0,
-                dataTexto: formatarDataExtenso(evento.inicio),
-                horaTexto: evento.hora,
+                dataTexto: formatarDataExtenso(_dataAtual.inicio),
+                horaTexto: _dataAtual.hora,
                 favoritado: favoritos.contem(evento.id),
                 onGarantirIngressos: (evento.linkIngressos ?? '').isEmpty
                     ? null
@@ -279,6 +332,10 @@ class TelaDetalheEvento extends StatelessWidget {
                 height: 1.5,
               ),
             ),
+            if (evento.atracoes.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              SecaoAtracoesEvento(atracoes: evento.atracoes),
+            ],
             const SizedBox(height: 20),
             const Text(
               'Informações',
@@ -320,115 +377,115 @@ class TelaDetalheEvento extends StatelessWidget {
             _CardInfo(
               child: evento.online
                   ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.language_rounded,
-                              color: Color(0xFF9A77D5),
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Evento online',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.language_rounded,
+                        color: Color(0xFF9A77D5),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Evento online',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Este evento acontece pela internet.',
-                          style: TextStyle(color: Colors.white70, height: 1.4),
-                        ),
-                        if ((evento.linkIngressos ?? '').isNotEmpty) ...[
-                          const SizedBox(height: 14),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () => _abrirIngressos(context),
-                              icon: const Icon(Icons.open_in_new_rounded, size: 17),
-                              label: const Text('Acessar evento online'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(color: Color(0xFF7C2BDC)),
-                                padding: const EdgeInsets.symmetric(vertical: 13),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              color: Color(0xFF9A77D5),
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Localização',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          evento.local,
-                          style: const TextStyle(
-                            color: Color(0xFF00FF00),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Este evento acontece pela internet.',
+                    style: TextStyle(color: Colors.white70, height: 1.4),
+                  ),
+                  if ((evento.linkIngressos ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _abrirIngressos(context),
+                        icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                        label: const Text('Acessar evento online'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF7C2BDC)),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          evento.endereco,
-                          style: const TextStyle(
-                            color: Colors.white60,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _abrirGoogleMaps(context),
-                            icon: const FaIcon(
-                              FontAwesomeIcons.mapLocationDot,
-                              size: 16,
-                            ),
-                            label: const Text('Como chegar'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Color(0xFF7C2BDC)),
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        MiniMapaEvento(
-                          latitude: evento.latitude,
-                          longitude: evento.longitude,
-                          titulo: evento.titulo,
-                          local: evento.local,
-                        ),
-                      ],
+                      ),
                     ),
+                  ],
+                ],
+              )
+                  : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: Color(0xFF9A77D5),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Localização',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    evento.local,
+                    style: const TextStyle(
+                      color: Color(0xFF00FF00),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    evento.endereco,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _abrirGoogleMaps(context),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.mapLocationDot,
+                        size: 16,
+                      ),
+                      label: const Text('Como chegar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF7C2BDC)),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  MiniMapaEvento(
+                    latitude: evento.latitude,
+                    longitude: evento.longitude,
+                    titulo: evento.titulo,
+                    local: evento.local,
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: 20),

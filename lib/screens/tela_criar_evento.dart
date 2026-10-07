@@ -284,7 +284,7 @@ class _TelaCriarEventoState extends State<TelaCriarEvento> {
                 ),
                 textStyle: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

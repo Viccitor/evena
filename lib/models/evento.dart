@@ -16,6 +16,7 @@ class Evento {
   final double? preco;
   final String organizador;
   final String? linkIngressos;
+  final bool ativo;
 
   Evento({
     required this.id,
@@ -35,6 +36,7 @@ class Evento {
     this.preco,
     this.organizador = 'Evena Oficial',
     this.linkIngressos,
+    this.ativo = true,
     // Parâmetros opcionais para compatibilidade retroativa com código legado
     String? dia,
     String? mes,
@@ -137,6 +139,8 @@ class Evento {
 
       linkIngressos:
       json['link']?.toString(),
+
+      ativo: json['status'] != false,
     );
   }
 
@@ -180,6 +184,7 @@ class Evento {
       'preco': preco,
       'organizador': organizador,
       'linkIngressos': linkIngressos,
+      'status': ativo,
     };
   }
 

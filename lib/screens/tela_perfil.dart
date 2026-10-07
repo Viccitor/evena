@@ -27,10 +27,10 @@ class _PerfilTabState extends State<PerfilTab> {
 
   // URLs padrão de fallback
   final String _bannerUrlPadrao =
-      'https://i.redd.it/fnaf-1-security-room-diorama-v0-6o8hjrmyp98c1.jpg?width=736&format=pjpg&auto=webp&s=36f683fb468601ce0d7f020f9949a3b84accabcb';
+      'assets/images/ícone-de-foto-perfil-padrao.png';
 
   final String _perfilUrlPadrao =
-      'https://cdn.britannica.com/52/243652-050-FEE0A5E4/Actor-Adam-Sandler-2019.jpg';
+      'assets/images/ícone-de-foto-perfil-padrao.png';
 
   // Função para alterar o banner
   Future<void> _alterarBanner() async {
@@ -101,7 +101,7 @@ class _PerfilTabState extends State<PerfilTab> {
                           height: double.infinity,
                           fit: BoxFit.cover,
                         )
-                            : Image.network(
+                            : Image.asset( // <--- Mudado de Image.network para Image.asset
                           _bannerUrlPadrao,
                           width: double.infinity,
                           height: double.infinity,
@@ -186,7 +186,7 @@ class _PerfilTabState extends State<PerfilTab> {
                                             height: double.infinity,
                                             fit: BoxFit.cover,
                                           )
-                                              : Image.network(
+                                              : Image.asset( // <--- Mudado de Image.network para Image.asset
                                             _perfilUrlPadrao,
                                             width: double.infinity,
                                             height: double.infinity,

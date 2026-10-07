@@ -87,7 +87,7 @@ class PassoRevisao extends StatelessWidget {
             _ItemRevisao('Categoria', rascunho.categoria),
             _ItemRevisao('Classificação', _classificacao()),
             _ItemRevisao('Descrição', rascunho.descricao.text),
-            _CapaRevisao(capa: rascunho.capa),
+            _CapaRevisao(capa: rascunho.capa, capaAsset: rascunho.capaAsset),
           ],
         ),
         const SizedBox(height: 14),
@@ -272,16 +272,19 @@ class _ItemRevisao extends StatelessWidget {
 
 class _CapaRevisao extends StatelessWidget {
   final File? capa;
+  final String? capaAsset;
 
-  const _CapaRevisao({required this.capa});
+  const _CapaRevisao({required this.capa, required this.capaAsset});
 
   @override
   Widget build(BuildContext context) {
-    final arquivo = capa;
-
-    if (arquivo == null) {
+    if (capa == null && capaAsset == null) {
       return const _ItemRevisao('Imagem de capa', 'Não selecionada');
     }
+
+    final imagem = capa != null
+        ? Image.file(capa!, width: 140, height: 84, fit: BoxFit.cover)
+        : Image.asset(capaAsset!, width: 140, height: 84, fit: BoxFit.cover);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,12 +296,7 @@ class _CapaRevisao extends StatelessWidget {
         const SizedBox(height: 6),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: Image.file(
-            arquivo,
-            width: 140,
-            height: 84,
-            fit: BoxFit.cover,
-          ),
+          child: imagem,
         ),
       ],
     );

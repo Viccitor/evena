@@ -4,14 +4,56 @@ import 'package:evena/components/criar_evento/campos_criar_evento.dart';
 import 'package:evena/data/categorias_data.dart';
 import 'package:evena/models/rascunho_evento.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-class PassoInformacoes extends StatelessWidget {
+class PassoInformacoes extends StatefulWidget {
   final RascunhoEvento rascunho;
 
   const PassoInformacoes({super.key, required this.rascunho});
 
-  static const int _limiteBytes = 5 * 1024 * 1024; // 5 MB
+  @override
+  State<PassoInformacoes> createState() => _PassoInformacoesState();
+}
+
+class _PassoInformacoesState extends State<PassoInformacoes> {
+  static const int _limiteBytes = 5 * 1024 * 1024;
+  static const String _pastaCapas = 'assets/images/capas_predefinidas/';
+
+  List<String> _capasPredefinidas = const [];
+
+  RascunhoEvento get rascunho => widget.rascunho;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarCapasPredefinidas();
+  }
+
+  Future<void> _carregarCapasPredefinidas() async {
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final capas = manifest
+          .listAssets()
+          .where((asset) => asset.startsWith(_pastaCapas))
+          .where(_ehImagem)
+          .toList()
+        ..sort();
+
+      if (mounted) setState(() => _capasPredefinidas = capas);
+    } catch (_) {
+      if (mounted) setState(() => _capasPredefinidas = const []);
+    }
+  }
+
+  bool _ehImagem(String caminho) {
+    final valor = caminho.toLowerCase();
+    return valor.endsWith('.jpg') ||
+        valor.endsWith('.jpeg') ||
+        valor.endsWith('.png') ||
+        valor.endsWith('.webp') ||
+        valor.endsWith('.gif');
+  }
 
   String? _obrigatorio(String texto) {
     return rascunho.mostrarErros && texto.trim().isEmpty
@@ -23,26 +65,17 @@ class PassoInformacoes extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texto)));
   }
 
-  Future<void> _escolherCapa(BuildContext context) async {
+  Future<void> _tirarFoto(BuildContext context) async {
     final picker = ImagePicker();
-    final arquivo = await picker.pickImage(source: ImageSource.gallery);
+    final arquivo = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 88,
+      preferredCameraDevice: CameraDevice.rear,
+    );
 
     if (arquivo == null) return;
 
-    final caminho = arquivo.path.toLowerCase();
-    final formatoValido = ['.jpg', '.jpeg', '.png', '.gif'].any(
-      caminho.endsWith,
-    );
-
-    if (!formatoValido) {
-      if (context.mounted) {
-        _mensagem(context, 'Use uma imagem JPG, PNG ou GIF.');
-      }
-      return;
-    }
-
     final tamanho = await arquivo.length();
-
     if (tamanho > _limiteBytes) {
       if (context.mounted) {
         _mensagem(context, 'A imagem deve ter até 5 MB.');
@@ -50,8 +83,96 @@ class PassoInformacoes extends StatelessWidget {
       return;
     }
 
-    rascunho.capa = File(arquivo.path);
-    rascunho.atualizar();
+    rascunho.definirCapaArquivo(File(arquivo.path));
+  }
+
+  Future<void> _escolherPredefinida(BuildContext context) async {
+    if (_capasPredefinidas.isEmpty) {
+      _mensagem(
+        context,
+        'Nenhuma imagem predefinida foi encontrada na pasta de capas.',
+      );
+      return;
+    }
+
+    final escolhida = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF140E32),
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Escolha uma capa pronta',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Essas imagens ficam dentro do próprio Evena. Nenhuma galeria do celular é aberta.',
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: MediaQuery.of(sheetContext).size.height * .48,
+                  child: GridView.builder(
+                    itemCount: _capasPredefinidas.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 16 / 10,
+                    ),
+                    itemBuilder: (_, index) {
+                      final asset = _capasPredefinidas[index];
+                      return Material(
+                        color: Colors.transparent,
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(12),
+                        child: InkWell(
+                          onTap: () => Navigator.pop(sheetContext, asset),
+                          child: Ink.image(
+                            image: AssetImage(asset),
+                            fit: BoxFit.cover,
+                            child: const Align(
+                              alignment: Alignment.bottomRight,
+                              child: Padding(
+                                padding: EdgeInsets.all(8),
+                                child: CircleAvatar(
+                                  radius: 15,
+                                  backgroundColor: Color(0xCC080427),
+                                  child: Icon(
+                                    Icons.check_rounded,
+                                    size: 18,
+                                    color: Color(0xFF00FF00),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (escolhida != null) {
+      rascunho.definirCapaAsset(escolhida);
+    }
   }
 
   @override
@@ -72,8 +193,6 @@ class PassoInformacoes extends StatelessWidget {
           aoDigitar: rascunho.aoDigitar,
         ),
         const SizedBox(height: 20),
-
-        // --- CATEGORIA ---
         const RotuloCampo(texto: 'Categoria', obrigatorio: true),
         const SizedBox(height: 8),
         InputDecorator(
@@ -107,8 +226,6 @@ class PassoInformacoes extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-
-        // --- CLASSIFICAÇÃO ETÁRIA ---
         const RotuloCampo(texto: 'Classificação etária', obrigatorio: true),
         const SizedBox(height: 8),
         Wrap(
@@ -128,12 +245,10 @@ class PassoInformacoes extends StatelessWidget {
         ),
         TextoErroCampo(erroClassificacao ? 'Selecione a classificação' : null),
         const SizedBox(height: 20),
-
         CampoCriarEvento(
           rotulo: 'Descrição do evento',
           obrigatorio: true,
-          hint: 'Conte um pouco sobre o evento, atrações e o que o público '
-              'pode esperar...',
+          hint: 'Conte um pouco sobre o evento, atrações e o que o público pode esperar...',
           controller: rascunho.descricao,
           maxLines: 5,
           maxLength: 500,
@@ -141,13 +256,11 @@ class PassoInformacoes extends StatelessWidget {
           aoDigitar: rascunho.aoDigitar,
         ),
         const SizedBox(height: 12),
-
-        // --- IMAGEM DE CAPA ---
         const RotuloCampo(texto: 'Imagem de capa', obrigatorio: true),
         const SizedBox(height: 8),
         _buildCapa(context),
         TextoErroCampo(
-          rascunho.mostrarErros && rascunho.capa == null
+          rascunho.mostrarErros && !rascunho.temCapa
               ? 'Escolha a imagem de capa'
               : null,
         ),
@@ -156,8 +269,26 @@ class PassoInformacoes extends StatelessWidget {
   }
 
   Widget _buildCapa(BuildContext context) {
-    final capa = rascunho.capa;
-    final comErro = rascunho.mostrarErros && capa == null;
+    final arquivo = rascunho.capa;
+    final asset = rascunho.capaAsset;
+    final comErro = rascunho.mostrarErros && !rascunho.temCapa;
+
+    Widget imagemSelecionada() {
+      if (arquivo != null) {
+        return Image.file(
+          arquivo,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+        );
+      }
+      return Image.asset(
+        asset!,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -165,39 +296,47 @@ class PassoInformacoes extends StatelessWidget {
         color: corCampoCriar,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: comErro
-              ? Colors.redAccent
-              : corRoxoCriar.withValues(alpha: .4),
+          color: comErro ? Colors.redAccent : corRoxoCriar.withValues(alpha: .4),
         ),
       ),
-      child: capa == null
+      child: !rascunho.temCapa
           ? Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(22),
         child: Column(
           children: [
-            const Icon(
-              Icons.arrow_upward_rounded,
-              color: corVerdeCriar,
-              size: 32,
-            ),
+            const Icon(Icons.photo_camera_rounded, color: corVerdeCriar, size: 34),
             const SizedBox(height: 10),
             const Text(
-              'Escolha uma imagem',
+              'Escolha como criar a capa',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 5),
             const Text(
-              'JPG, PNG ou GIF · até 5 MB',
+              'A câmera não abre a galeria nem mostra fotos antigas do celular.',
+              textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white38, fontSize: 11),
             ),
-            const SizedBox(height: 14),
-            BotaoAdicionar(
-              texto: 'Escolher arquivo',
-              onPressed: () => _escolherCapa(context),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: BotaoAdicionar(
+                    texto: 'Tirar foto',
+                    onPressed: () => _tirarFoto(context),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: BotaoAdicionar(
+                    texto: 'Imagem pronta',
+                    onPressed: () => _escolherPredefinida(context),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -206,30 +345,28 @@ class PassoInformacoes extends StatelessWidget {
         borderRadius: BorderRadius.circular(13),
         child: Stack(
           children: [
-            Image.file(
-              capa,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
+            imagemSelecionada(),
             Positioned(
               top: 8,
               right: 8,
               child: Row(
                 children: [
                   _BotaoCapa(
-                    icone: Icons.edit_outlined,
-                    dica: 'Trocar imagem',
-                    onTap: () => _escolherCapa(context),
+                    icone: Icons.photo_camera_outlined,
+                    dica: 'Tirar outra foto',
+                    onTap: () => _tirarFoto(context),
+                  ),
+                  const SizedBox(width: 8),
+                  _BotaoCapa(
+                    icone: Icons.collections_outlined,
+                    dica: 'Usar imagem pronta',
+                    onTap: () => _escolherPredefinida(context),
                   ),
                   const SizedBox(width: 8),
                   _BotaoCapa(
                     icone: Icons.delete_outline_rounded,
                     dica: 'Remover imagem',
-                    onTap: () {
-                      rascunho.capa = null;
-                      rascunho.atualizar();
-                    },
+                    onTap: rascunho.removerCapa,
                   ),
                 ],
               ),
@@ -267,9 +404,7 @@ class _ChipClassificacao extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: selecionado
-                  ? corVerdeCriar
-                  : corRoxoCriar.withValues(alpha: .35),
+              color: selecionado ? corVerdeCriar : corRoxoCriar.withValues(alpha: .35),
             ),
           ),
           child: Text(

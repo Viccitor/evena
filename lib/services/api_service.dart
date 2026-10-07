@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:evena/config/api_config.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class ApiException implements Exception {
@@ -48,12 +49,35 @@ class ApiService {
 
 
   static Future<dynamic> uploadFile(
-    String caminho, {
-    required File arquivo,
-    String campo = 'arquivo',
-  }) async {
+      String caminho, {
+        required File arquivo,
+        String campo = 'arquivo',
+      }) async {
     final request = http.MultipartRequest('POST', _uri(caminho));
     request.files.add(await http.MultipartFile.fromPath(campo, arquivo.path));
+
+    final streamed = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamed);
+
+    return _tratar(response);
+  }
+
+  static Future<dynamic> uploadAssetImage(
+      String caminho, {
+        required String assetPath,
+        String campo = 'arquivo',
+      }) async {
+    final bytes = await rootBundle.load(assetPath);
+    final nomeArquivo = assetPath.split('/').last;
+
+    final request = http.MultipartRequest('POST', _uri(caminho));
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        campo,
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+        filename: nomeArquivo,
+      ),
+    );
 
     final streamed = await request.send().timeout(const Duration(seconds: 30));
     final response = await http.Response.fromStream(streamed);

@@ -78,6 +78,27 @@ class RascunhoEvento extends ChangeNotifier {
   String? classificacao;
   final TextEditingController descricao = TextEditingController();
   File? capa;
+  String? capaAsset;
+
+  bool get temCapa => capa != null || capaAsset != null;
+
+  void definirCapaArquivo(File arquivo) {
+    capa = arquivo;
+    capaAsset = null;
+    atualizar();
+  }
+
+  void definirCapaAsset(String asset) {
+    capa = null;
+    capaAsset = asset;
+    atualizar();
+  }
+
+  void removerCapa() {
+    capa = null;
+    capaAsset = null;
+    atualizar();
+  }
 
   // --- Passo 2: Data e local ---
   final List<DataRascunho> datas = [DataRascunho()];
@@ -122,7 +143,7 @@ class RascunhoEvento extends ChangeNotifier {
   bool get temConteudo =>
       nome.text.trim().isNotEmpty ||
           descricao.text.trim().isNotEmpty ||
-          capa != null;
+          temCapa;
 
   // ---------------------------------------------------------------------------
   // Validação
@@ -155,7 +176,7 @@ class RascunhoEvento extends ChangeNotifier {
     if (categoria == null) return 'Selecione uma categoria.';
     if (classificacao == null) return 'Selecione a classificação etária.';
     if (descricao.text.trim().isEmpty) return 'Descreva o evento.';
-    if (capa == null) return 'Escolha a imagem de capa.';
+    if (!temCapa) return 'Escolha a imagem de capa.';
     return null;
   }
 

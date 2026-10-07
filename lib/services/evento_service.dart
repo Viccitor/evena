@@ -49,13 +49,19 @@ class EventoService extends ChangeNotifier {
     );
 
     final capa = rascunho.capa;
-    if (capa == null) {
+    final capaAsset = rascunho.capaAsset;
+    if (capa == null && capaAsset == null) {
       throw const ApiException('Escolha a imagem de capa.');
     }
 
-    final upload = await ApiService.uploadFile(
+    final upload = capa != null
+        ? await ApiService.uploadFile(
       '/arquivos/imagens',
       arquivo: capa,
+    ) as Map<String, dynamic>
+        : await ApiService.uploadAssetImage(
+      '/arquivos/imagens',
+      assetPath: capaAsset!,
     ) as Map<String, dynamic>;
 
     final capaUrl = upload['url']?.toString();
@@ -140,7 +146,7 @@ class EventoService extends ChangeNotifier {
     }
 
     final atualizado = await ApiService.get('/eventos/$eventoId')
-        as Map<String, dynamic>;
+    as Map<String, dynamic>;
     final evento = Evento.fromJson(atualizado);
 
     final indice = _eventos.indexWhere((item) => item.id == evento.id);
@@ -152,6 +158,57 @@ class EventoService extends ChangeNotifier {
     notifyListeners();
 
     return evento;
+  }
+
+  Future<List<Evento>> listarTodosParaAdmin() async {
+    final data = await ApiService.get('/eventos') as List<dynamic>;
+    return data
+        .map((item) => Evento.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Evento> editarEventoAdmin({
+    required Evento evento,
+    required String titulo,
+    required String descricao,
+    required String classificacao,
+    required double? preco,
+    required String? link,
+    required bool ativo,
+  }) async {
+    final data = await ApiService.put(
+      '/eventos/${evento.id}',
+      body: {
+        'titulo': titulo.trim(),
+        'status': ativo,
+        'classificacao': classificacao,
+        'banner': evento.imagemUrl,
+        'capa': evento.imagemUrl,
+        'descricao': descricao.trim(),
+        'preco': preco,
+        'link': (link == null || link.trim().isEmpty) ? null : link.trim(),
+      },
+    ) as Map<String, dynamic>;
+
+    final atualizado = Evento.fromJson(data);
+    final indice = _eventos.indexWhere((item) => item.id == atualizado.id);
+    if (atualizado.ativo) {
+      if (indice >= 0) {
+        _eventos[indice] = atualizado;
+      } else {
+        _eventos.insert(0, atualizado);
+      }
+    } else if (indice >= 0) {
+      _eventos.removeAt(indice);
+    }
+    notifyListeners();
+    return atualizado;
+  }
+
+  Future<void> removerEventoAdmin(String eventoId) async {
+    await ApiService.delete('/eventos/$eventoId');
+    _eventos.removeWhere((evento) => evento.id == eventoId);
+    notifyListeners();
   }
 
   Future<int> _obterOuCriarEmpresa({
@@ -204,7 +261,7 @@ class EventoService extends ChangeNotifier {
   List<Evento> pesquisar(String termo, {String? categoria}) {
     final busca = _normalizar(termo.trim());
     final filtroCategoria =
-        categoria == null ? '' : _normalizar(categoria.trim());
+    categoria == null ? '' : _normalizar(categoria.trim());
 
     return _eventos.where((evento) {
       if (filtroCategoria.isNotEmpty &&

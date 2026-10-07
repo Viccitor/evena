@@ -22,6 +22,16 @@ class AuthService {
 
   static bool get estaLogado => perfilAtual != null;
 
+  static const Set<String> _emailsAdmin = {
+    're.ls.freitas23@gmail.com',
+    'victor.m.marley@gmail.com',
+  };
+
+  static bool get ehAdmin {
+    final email = normalizarEmail(perfilAtual?.email ?? '');
+    return _emailsAdmin.contains(email);
+  }
+
   // ---------------------------------------------------------------------------
   // Sessão
   // ---------------------------------------------------------------------------

@@ -12,6 +12,7 @@ import 'package:evena/screens/tela_perfil.dart';
 import 'package:evena/services/auth_service.dart';
 import 'package:evena/data/categorias_data.dart';
 import 'package:evena/screens/tela_organizador.dart';
+import 'package:evena/screens/tela_admin.dart';
 import 'package:evena/services/evento_service.dart';
 
 class TelaHome extends StatefulWidget {
@@ -35,6 +36,7 @@ class _TelaHomeState extends State<TelaHome> {
     super.initState();
     _pageController = PageController(initialPage: _indiceAtual);
     _eventoService.addListener(_sincronizarEventos);
+    AuthService.perfilListenable.addListener(_sincronizarAcessoAdmin);
     _sincronizarEventos();
     if (_eventoService.eventos.isEmpty) {
       _eventoService.carregar();
@@ -45,10 +47,20 @@ class _TelaHomeState extends State<TelaHome> {
   @override
   void dispose() {
     _eventoService.removeListener(_sincronizarEventos);
+    AuthService.perfilListenable.removeListener(_sincronizarAcessoAdmin);
     _pageController.dispose();
     super.dispose();
   }
 
+
+  void _sincronizarAcessoAdmin() {
+    if (!mounted) return;
+    if (!AuthService.ehAdmin && _indiceAtual > 2) {
+      _indiceAtual = 0;
+      if (_pageController.hasClients) _pageController.jumpToPage(0);
+    }
+    setState(() {});
+  }
 
   void _sincronizarEventos() {
     if (!mounted) return;
@@ -198,6 +210,7 @@ class _TelaHomeState extends State<TelaHome> {
 
   @override
   Widget build(BuildContext context) {
+    final ehAdmin = AuthService.ehAdmin;
     final paginas = [
       _InicioTab(
         onAbrirCategoria: _abrirCategoria,
@@ -209,6 +222,7 @@ class _TelaHomeState extends State<TelaHome> {
       ),
       FavoritosTab(onAbrirEvento: _abrirEvento),
       const PerfilTab(),
+      if (ehAdmin) const TelaAdmin(),
     ];
 
     return Scaffold(
@@ -228,7 +242,7 @@ class _TelaHomeState extends State<TelaHome> {
           ),
         ),
         actions: [
-          if (_indiceAtual != 2)
+          if (_indiceAtual != 2 && _indiceAtual != 3)
             IconButton(
               tooltip: 'Pesquisar',
               onPressed: _abrirPesquisa,
@@ -268,13 +282,13 @@ class _TelaHomeState extends State<TelaHome> {
           backgroundColor: const Color(0xFF181236),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: _mudarAba,
-          destinations: const [
-            NavigationDestination(
+          destinations: [
+            const NavigationDestination(
               icon: Icon(Icons.home_outlined, color: Colors.white54),
               selectedIcon: Icon(Icons.home_rounded, color: Color(0xFF63D13E)),
               label: 'Início',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.favorite_border_rounded, color: Colors.white54),
               selectedIcon: Icon(
                 Icons.favorite_rounded,
@@ -282,7 +296,7 @@ class _TelaHomeState extends State<TelaHome> {
               ),
               label: 'Favoritos',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.person_outline_rounded, color: Colors.white54),
               selectedIcon: Icon(
                 Icons.person_rounded,
@@ -290,6 +304,18 @@ class _TelaHomeState extends State<TelaHome> {
               ),
               label: 'Perfil',
             ),
+            if (ehAdmin)
+              const NavigationDestination(
+                icon: Icon(
+                  Icons.admin_panel_settings_outlined,
+                  color: Colors.white54,
+                ),
+                selectedIcon: Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Color(0xFF00FF00),
+                ),
+                label: 'Admin',
+              ),
           ],
         ),
       ),

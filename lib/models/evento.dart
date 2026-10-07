@@ -310,9 +310,12 @@ class Evento {
 
     final local = json['local']?.toString().trim() ?? '';
     final endereco = json['endereco']?.toString().trim() ?? '';
-    final link = json['link']?.toString().trim() ?? '';
+    final linkTransmissao =
+        json['linkTransmissao']?.toString().trim() ??
+            json['linkLive']?.toString().trim() ??
+            '';
 
-    if (local.isEmpty && endereco.isEmpty && link.isNotEmpty) {
+    if (local.isEmpty && endereco.isEmpty && linkTransmissao.isNotEmpty) {
       return 'Online';
     }
     return 'Presencial';

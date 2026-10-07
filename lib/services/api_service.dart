@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:evena/config/api_config.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiException implements Exception {
   final String mensagem;
@@ -47,14 +48,21 @@ class ApiService {
     return _tratar(response);
   }
 
-
   static Future<dynamic> uploadFile(
       String caminho, {
         required File arquivo,
         String campo = 'arquivo',
       }) async {
     final request = http.MultipartRequest('POST', _uri(caminho));
-    request.files.add(await http.MultipartFile.fromPath(campo, arquivo.path));
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        campo,
+        arquivo.path,
+        filename: arquivo.path.split(Platform.pathSeparator).last,
+        contentType: _contentTypeImagem(arquivo.path),
+      ),
+    );
 
     final streamed = await request.send().timeout(const Duration(seconds: 30));
     final response = await http.Response.fromStream(streamed);
@@ -76,6 +84,7 @@ class ApiService {
         campo,
         bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
         filename: nomeArquivo,
+        contentType: _contentTypeImagem(nomeArquivo),
       ),
     );
 
@@ -83,6 +92,32 @@ class ApiService {
     final response = await http.Response.fromStream(streamed);
 
     return _tratar(response);
+  }
+
+  static MediaType _contentTypeImagem(String caminho) {
+    final nome = caminho.toLowerCase().split('?').first;
+
+    if (nome.endsWith('.png')) {
+      return MediaType('image', 'png');
+    }
+    if (nome.endsWith('.webp')) {
+      return MediaType('image', 'webp');
+    }
+    if (nome.endsWith('.gif')) {
+      return MediaType('image', 'gif');
+    }
+    if (nome.endsWith('.bmp')) {
+      return MediaType('image', 'bmp');
+    }
+    if (nome.endsWith('.heic')) {
+      return MediaType('image', 'heic');
+    }
+    if (nome.endsWith('.heif')) {
+      return MediaType('image', 'heif');
+    }
+
+    // JPG/JPEG é o formato mais comum retornado pelo image_picker.
+    return MediaType('image', 'jpeg');
   }
 
   static Future<dynamic> put(
@@ -127,17 +162,26 @@ class ApiService {
     dynamic data;
 
     if (response.body.isNotEmpty) {
-      data = jsonDecode(utf8.decode(response.bodyBytes));
+      try {
+        data = jsonDecode(utf8.decode(response.bodyBytes));
+      } catch (_) {
+        data = null;
+      }
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
     }
 
-    if (data is Map<String, dynamic> && data['erro'] != null) {
-      throw ApiException(data['erro'].toString());
+    if (data is Map<String, dynamic>) {
+      final mensagem = data['erro'] ?? data['message'] ?? data['mensagem'];
+      if (mensagem != null) {
+        throw ApiException(mensagem.toString());
+      }
     }
 
-    throw ApiException('Não foi possível concluir a operação.');
+    throw ApiException(
+      'Não foi possível concluir a operação. HTTP ${response.statusCode}.',
+    );
   }
 }

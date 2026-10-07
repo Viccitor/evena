@@ -71,9 +71,6 @@ class EventoService extends ChangeNotifier {
 
     final linkIngressos = rascunho.linkIngressos.text.trim();
     final linkOnline = rascunho.linkOnline.text.trim();
-    final link = rascunho.online && linkOnline.isNotEmpty
-        ? linkOnline
-        : (linkIngressos.isNotEmpty ? linkIngressos : null);
 
     final criado = await ApiService.post(
       '/empresas/$empresaId/eventos',
@@ -85,7 +82,9 @@ class EventoService extends ChangeNotifier {
         'capa': capaUrl,
         'descricao': rascunho.descricao.text.trim(),
         'preco': rascunho.pago == true ? rascunho.precoValor : 0,
-        'link': link,
+        'link': linkIngressos.isEmpty ? null : linkIngressos,
+        'linkTransmissao':
+        rascunho.online && linkOnline.isNotEmpty ? linkOnline : null,
       },
     ) as Map<String, dynamic>;
 
@@ -187,6 +186,7 @@ class EventoService extends ChangeNotifier {
         'descricao': descricao.trim(),
         'preco': preco,
         'link': (link == null || link.trim().isEmpty) ? null : link.trim(),
+        'linkTransmissao': evento.linkTransmissao,
       },
     ) as Map<String, dynamic>;
 

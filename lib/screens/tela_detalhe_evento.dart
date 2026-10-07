@@ -2,6 +2,7 @@ import 'package:evena/components/card_secao.dart';
 import 'package:evena/models/evento.dart';
 import 'package:evena/services/favoritos_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:evena/components/mini_mapa_evento.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -54,6 +55,26 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
     await _abrirUrl(context, uri, 'Não foi possível abrir o link dos ingressos.');
   }
 
+  Future<void> _abrirTransmissao(BuildContext context) async {
+    final url = evento.linkTransmissao?.trim() ?? '';
+    final uri = Uri.tryParse(url);
+
+    if (url.isEmpty || uri == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Link do evento online não informado.')),
+        );
+      }
+      return;
+    }
+
+    await _abrirUrl(
+      context,
+      uri,
+      'Não foi possível abrir o evento online.',
+    );
+  }
+
   Future<void> _alternarFavorito(BuildContext context) async {
     final sucesso = await FavoritosService.instance.alternar(evento.id);
 
@@ -100,12 +121,24 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
         '$localTexto\n\n'
         'Veja no Evena:\n$linkEvento';
 
-    await SharePlus.instance.share(
-      ShareParams(
-        text: texto,
-        subject: evento.titulo,
-      ),
-    );
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: texto,
+          subject: evento.titulo,
+        ),
+      );
+    } on MissingPluginException {
+      await Clipboard.setData(ClipboardData(text: texto));
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Link do evento copiado para a área de transferência.'),
+          ),
+        );
+      }
+    }
   }
 
   void _reportar(BuildContext context) {
@@ -400,7 +433,7 @@ class _TelaDetalheEventoState extends State<TelaDetalheEvento> {
                     'Este evento acontece pela internet.',
                     style: TextStyle(color: Colors.white70, height: 1.4),
                   ),
-                  if ((evento.linkIngressos ?? '').isNotEmpty) ...[
+                  if ((evento.linkTransmissao ?? '').isNotEmpty) ...[
                     const SizedBox(height: 14),
                     SizedBox(
                       width: double.infinity,

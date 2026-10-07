@@ -27,10 +27,10 @@ class _PerfilTabState extends State<PerfilTab> {
 
   // URLs padrão de fallback
   final String _bannerUrlPadrao =
-      'assets/images/ícone-de-foto-perfil-padrao.png';
+      'assets/images/logo_1.jpeg';
 
   final String _perfilUrlPadrao =
-      'assets/images/ícone-de-foto-perfil-padrao.png';
+      'assets/images/logo_1.jpeg';
 
   // Função para alterar o banner
   Future<void> _alterarBanner() async {

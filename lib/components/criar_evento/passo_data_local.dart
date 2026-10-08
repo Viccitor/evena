@@ -52,6 +52,10 @@ class PassoDataLocal extends StatelessWidget {
       helpText: titulo,
       cancelText: 'Cancelar',
       confirmText: 'OK',
+      // Só teclado: digita as horas e os minutos, sem o relógio.
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+      hourLabelText: 'Hora',
+      minuteLabelText: 'Minuto',
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),

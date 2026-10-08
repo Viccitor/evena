@@ -241,6 +241,23 @@ class Evento {
       if (atracao != null) atracoes.add(atracao);
     }
 
+    // "comodidades" pode vir como lista (["acessibilidade", "wifi"]) ou como
+    // texto separado por vírgula ("acessibilidade,wifi").
+    final comodidadesBrutas = json['comodidades'];
+    final comodidades = <String>[];
+    if (comodidadesBrutas is List) {
+      for (final item in comodidadesBrutas) {
+        final chave = item is Map
+            ? (item['chave'] ?? item['nome'] ?? '').toString()
+            : item.toString();
+        if (chave.trim().isNotEmpty) comodidades.add(chave.trim().toLowerCase());
+      }
+    } else if (comodidadesBrutas is String) {
+      for (final chave in comodidadesBrutas.split(',')) {
+        if (chave.trim().isNotEmpty) comodidades.add(chave.trim().toLowerCase());
+      }
+    }
+
     return Evento(
       id: (json['id'] ?? '').toString(),
 
@@ -255,6 +272,8 @@ class Evento {
       datas: datas,
 
       atracoes: atracoes,
+
+      comodidades: comodidades,
 
       inicio: null,
 
@@ -310,12 +329,12 @@ class Evento {
 
     final local = json['local']?.toString().trim() ?? '';
     final endereco = json['endereco']?.toString().trim() ?? '';
-    final linkTransmissao =
-        json['linkTransmissao']?.toString().trim() ??
-            json['linkLive']?.toString().trim() ??
-            '';
+    final linkTransmissao = json['linkTransmissao']?.toString().trim() ?? '';
+    final linkLegado = json['link']?.toString().trim() ?? '';
 
-    if (local.isEmpty && endereco.isEmpty && linkTransmissao.isNotEmpty) {
+    if (local.isEmpty &&
+        endereco.isEmpty &&
+        (linkTransmissao.isNotEmpty || linkLegado.isNotEmpty)) {
       return 'Online';
     }
     return 'Presencial';

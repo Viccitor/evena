@@ -83,8 +83,8 @@ class EventoService extends ChangeNotifier {
         'descricao': rascunho.descricao.text.trim(),
         'preco': rascunho.pago == true ? rascunho.precoValor : 0,
         'link': linkIngressos.isEmpty ? null : linkIngressos,
-        'linkTransmissao':
-        rascunho.online && linkOnline.isNotEmpty ? linkOnline : null,
+        'linkTransmissao': linkOnline.isEmpty ? null : linkOnline,
+        'comodidades': rascunho.comodidades.toList(),
       },
     ) as Map<String, dynamic>;
 
@@ -187,6 +187,7 @@ class EventoService extends ChangeNotifier {
         'preco': preco,
         'link': (link == null || link.trim().isEmpty) ? null : link.trim(),
         'linkTransmissao': evento.linkTransmissao,
+        'comodidades': evento.comodidades,
       },
     ) as Map<String, dynamic>;
 
